@@ -1,0 +1,50 @@
+PROPRIETARY AND CONFIDENTIAL LICENSE
+Copyright (c) 2026 Kelsea Ziegler. All Rights Reserved.
+
+TERMS AND CONDITIONS
+
+1. OWNERSHIP AND RETENTION OF RIGHTS
+The software, including but not limited to its source code, compiled binaries, layout designs, 
+brand configurations, database schemas, scripts, documentation, and specific algorithmic 
+logic (collectively referred to as "the Software"), is the sole, exclusive, and unalienable 
+intellectual property of Kelsea Ziegler (the "Author"). All copyrights, patents, trademarks, 
+trade secrets, and other intellectual property rights are retained exclusively by the Author 
+worldwide.
+
+2. ABSOLUTE RESTRICTIONS ON COPYING AND REPRODUCTION
+You are strictly prohibited from:
+  a. Copying, duplicating, reproducing, or cloning the Software, in whole or in part, 
+     for any reason other than personal local execution.
+  b. Creating derivative works, translating, modifying, adapting, or reverse engineering 
+     the Software.
+  c. Distributing, publishing, licensing, sublicensing, leasing, renting, or transferring 
+     the Software to any third party.
+
+3. Git / Public Repository Safe Harbor Exception
+In the event that this Software is hosted on a public version-control repository (such as 
+GitHub, GitLab, or Bitbucket), users of the hosting platform are granted a limited, 
+non-transferable, revocable license to:
+  a. Fork, clone, or view the source code solely through the mechanics provided by the 
+     hosting platform.
+  b. Execute the Software locally on their personal hardware for educational, review, 
+     or contributor feedback purposes.
+This exception strictly excludes any commercial utilization, SaaS deployment, incorporation 
+into other codebases, or general distribution of the Software.
+
+4. COGNITIVE ARCHITECTURE & INTELLECTUAL SAFEGUARDS
+All structured design patterns (including but not limited to the ArgOS Continuum, 
+Continuity Spine, Hydraulic Intent Engine, and S7 Framework configurations) are protected 
+under trade secret provisions and remain proprietary to Kelsea Ziegler.
+
+5. TERMINATION
+This License and any permissions granted under it shall automatically terminate without notice 
+if you violate any of the terms, restrictions, or conditions listed herein. Upon termination, 
+you must immediately cease all use of the Software and destroy all copies in your possession.
+
+6. DISCLAIMER OF WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, 
+DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, 
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+IN THE SOFTWARE.
