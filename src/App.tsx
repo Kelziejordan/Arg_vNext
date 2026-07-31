@@ -444,12 +444,38 @@ function AppContent() {
           
           {/* Main Console Focus Area (9 Columns) */}
           <section className="lg:col-span-9 flex flex-col space-y-6">
+            {perspective === 'customer' && (
+              <div className="bg-[#0A0A0A] border border-[#222] rounded-lg p-4 animate-fade-in flex flex-col md:flex-row justify-between gap-4">
+                <div className="space-y-1 md:max-w-[30%]">
+                  <span className="text-[9px] font-mono font-bold text-[#FFD700] uppercase block">Sovereign State</span>
+                  <p className="text-xs font-serif italic text-white leading-snug">"I resumed exactly where I left off."</p>
+                  <p className="text-[10px] text-gray-500 leading-normal">
+                    Local state memory keeps your core calibration parameters perfectly saved and restored automatically.
+                  </p>
+                </div>
+                <div className="space-y-1 md:max-w-[30%] border-t md:border-t-0 md:border-l border-[#222] pt-3 md:pt-0 md:pl-4">
+                  <span className="text-[9px] font-mono font-bold text-white uppercase block">Isolated Context</span>
+                  <p className="text-xs font-serif italic text-white leading-snug">"My project didn't lose context."</p>
+                  <p className="text-[10px] text-gray-500 leading-normal">
+                    Secure Knowledge Engines lock core values into isolated, offline-first structures for safety.
+                  </p>
+                </div>
+                <div className="space-y-1 md:max-w-[30%] border-t md:border-t-0 md:border-l border-[#222] pt-3 md:pt-0 md:pl-4">
+                  <span className="text-[9px] font-mono font-bold text-[#FFD700] uppercase block">Autonomic Continuity</span>
+                  <p className="text-xs font-serif italic text-white leading-snug">"Never lose your progress."</p>
+                  <p className="text-[10px] text-gray-500 leading-normal">
+                    Event-sourced event ledgers and zero-drift reconstruction tools safeguard your build offline.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Nav tabs bar */}
             <nav className="flex border-b border-[#222] gap-1 overflow-x-auto scrollbar-none animate-fade-in" id="dashboard-navigation">
               <button
                 onClick={() => {
                   setActiveTab('STATE');
-                  addLog('Accessing Operational State Service (Pillar 1).', 'INFO', 'SPINE');
+                  addLog(perspective === 'customer' ? 'Accessing System Alignment Service.' : 'Accessing Operational State Service (Pillar 1).', 'INFO', 'SPINE');
                 }}
                 className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
                   activeTab === 'STATE'
@@ -458,12 +484,12 @@ function AppContent() {
                 }`}
               >
                 <Lock className="w-3.5 h-3.5" />
-                OPERATIONAL STATE
+                {perspective === 'customer' ? 'SYSTEM ALIGNMENT' : 'OPERATIONAL STATE'}
               </button>
               <button
                 onClick={() => {
                   setActiveTab('MEMORY');
-                  addLog('Accessing Knowledge Objects Service (Pillar 2).', 'INFO', 'SPINE');
+                  addLog(perspective === 'customer' ? 'Accessing Secure Knowledge Service.' : 'Accessing Knowledge Objects Service (Pillar 2).', 'INFO', 'SPINE');
                 }}
                 className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
                   activeTab === 'MEMORY'
@@ -472,12 +498,12 @@ function AppContent() {
                 }`}
               >
                 <Database className="w-3.5 h-3.5" />
-                KNOWLEDGE OBJECTS
+                {perspective === 'customer' ? 'SECURE KNOWLEDGE' : 'KNOWLEDGE OBJECTS'}
               </button>
               <button
                 onClick={() => {
                   setActiveTab('REGISTRY');
-                  addLog('Accessing Capability Registry Service (Pillar 4).', 'INFO', 'SPINE');
+                  addLog(perspective === 'customer' ? 'Accessing Task Pipelines.' : 'Accessing Capability Registry Service (Pillar 4).', 'INFO', 'SPINE');
                 }}
                 className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
                   activeTab === 'REGISTRY'
@@ -486,12 +512,12 @@ function AppContent() {
                 }`}
               >
                 <GitBranch className="w-3.5 h-3.5" />
-                CAPABILITY REGISTRY
+                {perspective === 'customer' ? 'TASK PIPELINES' : 'CAPABILITY REGISTRY'}
               </button>
               <button
                 onClick={() => {
                   setActiveTab('GOVERNANCE');
-                  addLog('Entering Policy & Constitutional Governance (Pillar 3).', 'INFO', 'SPINE');
+                  addLog(perspective === 'customer' ? 'Accessing Integrity Rules & Controls.' : 'Entering Policy & Constitutional Governance (Pillar 3).', 'INFO', 'SPINE');
                 }}
                 className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
                   activeTab === 'GOVERNANCE'
@@ -500,12 +526,12 @@ function AppContent() {
                 }`}
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
-                GOVERNANCE
+                {perspective === 'customer' ? 'INTEGRITY RULES' : 'GOVERNANCE'}
               </button>
               <button
                 onClick={() => {
                   setActiveTab('RESTORATION');
-                  addLog('Accessing Restoration & Reflex Reconstruction (Pillar 5).', 'INFO', 'SPINE');
+                  addLog(perspective === 'customer' ? 'Accessing Recovery & Rollback Systems.' : 'Accessing Restoration & Reflex Reconstruction (Pillar 5).', 'INFO', 'SPINE');
                 }}
                 className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
                   activeTab === 'RESTORATION'
@@ -514,7 +540,7 @@ function AppContent() {
                 }`}
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                RESTORATION
+                {perspective === 'customer' ? 'RECOVERY & ROLLBACK' : 'RESTORATION'}
               </button>
             </nav>
 
@@ -780,6 +806,11 @@ function AppContent() {
                 <span className="text-gray-300">{log.message}</span>
               </div>
             ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-t border-[#111] pt-2 mt-1 text-[9px] font-mono text-gray-500 gap-1">
+            <span>Sovereign Contact Node: <a href="mailto:kelseaziegler@gmail.com" className="text-white hover:text-[#FFD700] transition-colors font-bold underline">kelseaziegler@gmail.com</a></span>
+            <span>Architectural Core frozen in partnership with Gemini V12</span>
           </div>
         </footer>
       </main>
