@@ -2,7 +2,7 @@
 
 An offline-first, sovereign cybernetic runtime control center focusing on architectural alignment, static mandate linting, and reflex state reconstruction.
 
-Designed in partnership with Gemini for absolute architectural integrity and operator independence.
+Designed for absolute architectural integrity and operator independence.
 
 ---
 
@@ -18,9 +18,9 @@ The workspace is designed with absolute portability in mind:
 *   **Sovereign State Storage:** Local state, snapshots, and event-sourced ledger updates reside inside standard client memory systems (`localStorage` patterns / active context).
 *   **Reflex Reconstruction Engine:** Runs a step-by-step autonomic alignment and manual/automated roll-back loop to keep cognitive drift within safe thresholds.
 
-### Portability and Running Outside of AI Studio
+### Portability
 
-Yes, this build is **100% portable** and is not stuck inside AI Studio. You can download and run it in any modern web runtime or container system.
+Yes, this build is **100% portable** and is not stuck inside any specific platform. You can download and run it in any modern web runtime or container system.
 
 #### Running Locally (Stand-alone Development)
 
