@@ -152,6 +152,7 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     metabolicCost: 45
   });
   const [confidence, setConfidence] = useState<number>(0.95);
+  const [activeScenario, setActiveScenario] = useState<string | null>(null);
   const [operatingState, setOperatingStateRaw] = useState<'SHIP' | 'FREEZE' | 'EXPAND'>('SHIP');
   const [logs, setLogs] = useState<SystemLog[]>([]);
   const [goals, setGoals] = useState<PriorityGoal[]>([
@@ -509,17 +510,17 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
 
   // Synchronized Engine Loop using refs for precise timing
   const simRef = useRef({ ...simState, roundId: 101 });
-  const paramsRef = useRef({ pumpRate, leakRate, recoilValue, resistance, simSpeed, simActive });
+  const paramsRef = useRef({ pumpRate, leakRate, recoilValue, resistance, simSpeed, simActive, activeScenario: null as string | null });
   
   useEffect(() => {
-    paramsRef.current = { pumpRate, leakRate, recoilValue, resistance, simSpeed, simActive };
-  }, [pumpRate, leakRate, recoilValue, resistance, simSpeed, simActive]);
+    paramsRef.current = { pumpRate, leakRate, recoilValue, resistance, simSpeed, simActive, activeScenario };
+  }, [pumpRate, leakRate, recoilValue, resistance, simSpeed, simActive, activeScenario]);
 
   useEffect(() => {
     if (!simActive) return;
 
     const interval = setInterval(() => {
-      const { pumpRate: pPump, leakRate: pLeak, recoilValue: pRecoil, resistance: pRes, simSpeed: speed } = paramsRef.current;
+      const { pumpRate: pPump, leakRate: pLeak, recoilValue: pRecoil, resistance: pRes, simSpeed: speed, activeScenario: currentScenario } = paramsRef.current;
       const r = simRef.current;
 
       if (r.gameState === 'STANDBY' || r.gameState === 'PRE_GAME') {
@@ -666,13 +667,34 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         consecutiveLosses: r.consecutiveLosses,
         history: [...r.history]
       });
+
+      if (!currentScenario) {
+        const totalGames = r.winCount + r.lossCount;
+        const calculatedCorrectness = totalGames > 0
+          ? Math.round((r.winCount / totalGames) * 100)
+          : 100;
+          
+        const calculatedContinuity = Math.max(50, 98 - (r.consecutiveLosses * 15));
+        const baseSpeed = r.gameState === 'RUNNING' ? 12 : 14;
+        const calculatedSpeed = Math.round(baseSpeed + Math.sin(r.roundId + r.gameMultiplier) * 1.5 + (r.pressure * 2));
+        const baseLeverage = r.sentinelMode === 'CHASE_10X' ? 15.0 : 9.35;
+        const calculatedLeverage = parseFloat((baseLeverage + (r.pressure * 0.8) - 0.4).toFixed(2));
+        const calculatedCost = r.gameState === 'RUNNING' ? Math.round(45 + r.pressure * 20) : 45;
+
+        setMetrics({
+          speed: calculatedSpeed,
+          leverage: calculatedLeverage,
+          correctness: calculatedCorrectness,
+          continuity: calculatedContinuity,
+          metabolicCost: calculatedCost
+        });
+      }
     }, 100);
 
     return () => clearInterval(interval);
   }, [simActive, addLog, addSimLog]);
 
   // Demo Scenarios Trigger Engine (Layer 5/Demo scenarios)
-  const [activeScenario, setActiveScenario] = useState<string | null>(null);
   
   const triggerScenario = useCallback((scenarioName: string) => {
     setActiveScenario(scenarioName);

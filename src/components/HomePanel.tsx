@@ -58,7 +58,7 @@ export default function HomePanel({ onNavigate }: HomePanelProps) {
             </h1>
             <p className="text-xs md:text-sm text-gray-300 leading-relaxed font-serif italic">
               {perspective === 'customer' 
-                ? "Arg Anchor lets you resume complex operations with governed state memory, instead of rebuilding your project's context from scratch every session."
+                ? "Resume any AI project exactly where you left off—even across models and sessions. Every important decision, constraint, and validated result is preserved as governed project state—not just chat history."
                 : "Deterministic single-page cybernetic dashboard running state determinism, isolated knowledge adapters, and AOT linting routines."
               }
             </p>
@@ -197,6 +197,14 @@ export default function HomePanel({ onNavigate }: HomePanelProps) {
       </div>
 
       {/* Sovereign Intent Translation Section */}
+      <div className="text-center py-6 space-y-1.5 border-t border-[#1a1a1a] pt-10">
+        <h2 className="text-xl md:text-2xl font-black font-mono tracking-tight text-white uppercase">
+          What would you like to build today?
+        </h2>
+        <p className="text-[10px] md:text-xs text-gray-500 font-mono uppercase tracking-widest max-w-xl mx-auto">
+          State your requirements in natural language below to compile them into a technology-agnostic canonical representation and live code projections.
+        </p>
+      </div>
       <IntentTranslator />
 
       {/* The 5 Pillar Exploration Section */}

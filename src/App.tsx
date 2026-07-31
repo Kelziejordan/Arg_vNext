@@ -398,6 +398,14 @@ function AppContent() {
         </section>
 
         {/* Top Level Bento-Grid Metrics */}
+        <div className="flex items-center justify-between mb-3 mt-1">
+          <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-bold">Active System Telemetry</span>
+          <span className="text-[9px] font-mono text-[#FFD700] bg-[#FFD700]/10 border border-[#FFD700]/20 px-2 py-0.5 rounded uppercase font-extrabold flex items-center gap-1.5 animate-pulse">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FFD700]" />
+            Simulation Core State
+          </span>
+        </div>
+        
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in animate-once" id="system-metrics">
           <div className="bg-[#0A0A0A] border border-[#222] p-4 rounded flex items-center gap-3.5 hover:border-[#FFD700]/10 transition-all duration-300">
             <div className="p-2 bg-[#FFD700]/10 text-[#FFD700] rounded shrink-0">
@@ -406,6 +414,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Apex Latency</span>
               <p className="text-xl font-mono font-black text-white">{metrics.speed}ms</p>
+              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Simulated</span>
             </div>
           </div>
 
@@ -416,6 +425,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Leverage ratio</span>
               <p className="text-xl font-mono font-black text-white">{metrics.leverage}x</p>
+              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Simulated</span>
             </div>
           </div>
 
@@ -426,6 +436,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Correctness</span>
               <p className="text-xl font-mono font-black text-white">{metrics.correctness}%</p>
+              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Simulated</span>
             </div>
           </div>
 
@@ -436,6 +447,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Resilience</span>
               <p className="text-xl font-mono font-black text-white">{metrics.continuity}%</p>
+              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Simulated</span>
             </div>
           </div>
         </section>

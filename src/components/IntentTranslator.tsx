@@ -16,7 +16,11 @@ import {
   RefreshCw,
   Search,
   BookOpen,
-  Plus
+  Plus,
+  Layers,
+  Shuffle,
+  Shield,
+  Activity
 } from 'lucide-react';
 import { useRuntime } from '../core/RuntimeContext';
 
@@ -241,6 +245,78 @@ describe('Tenant Separation Policy Validation', () => {
     }
   }
 ];
+
+const CAPABILITY_ORCHESTRATION_DATA: Record<string, Array<{ capability: string, demand: string, engine: string, tier: string, badge: string }>> = {
+  inspection: [
+    {
+      capability: 'SOVEREIGN LOCAL PERSISTENCE',
+      demand: 'Architect client-side sandbox write-locks and sync queues (IndexedDB).',
+      engine: 'LONG-CONTEXT REASONING ENGINE',
+      tier: 'Claude-3.5-Sonnet equivalent capability-tier',
+      badge: 'Zero-loss state'
+    },
+    {
+      capability: 'HERMETIC DOCUMENT GENERATION',
+      demand: 'Compile offline-first PDF layout algorithms and file serialization tools.',
+      engine: 'FAST SYNTAX GENERATION BLOCK',
+      tier: 'Gemini-1.5-Flash equivalent capability-tier',
+      badge: '1.2x compile velocity'
+    },
+    {
+      capability: 'DETERMINISTIC TESTING INGRESS',
+      demand: 'Synthesize isolated unit tests verifying sync queues and conflict resolution mechanics.',
+      engine: 'LOGIC CHECKING SPECIALIST',
+      tier: 'GPT-4o equivalent capability-tier',
+      badge: '100% policy compliance'
+    }
+  ],
+  ledger: [
+    {
+      capability: 'IMMUTABLE MULTI-TENANT RLS',
+      demand: 'Generate strict PostgreSQL Row Level Security (RLS) constraints and tenant boundaries.',
+      engine: 'CRYPTOGRAPHIC BOUNDARY SPECIALIST',
+      tier: 'Claude-3.5-Sonnet equivalent capability-tier',
+      badge: 'Unbreachable'
+    },
+    {
+      capability: 'STATIC TRANSACTION AUDITING',
+      demand: 'Deconstruct budget policy expressions and design real-time warning indicators.',
+      engine: 'LOGICAL COGNITIVE SOLVER',
+      tier: 'Gemini-1.5-Pro equivalent capability-tier',
+      badge: '0ms delay parsing'
+    },
+    {
+      capability: 'STREAMING SYNC PIPELINES',
+      demand: 'Construct bank transaction ingestion Webhooks with automatic error retry states.',
+      engine: 'FAST ASYNC ROUTING AGENT',
+      tier: 'GPT-4o-mini equivalent capability-tier',
+      badge: '99.9% uptime dispatch'
+    }
+  ],
+  custom: [
+    {
+      capability: 'DYNAMIC LEXICAL SYNTAX PARSING',
+      demand: 'Map custom natural language requests to structured canonical specifications.',
+      engine: 'GENERALIST INTENT COMPILER',
+      tier: 'Gemini-1.5-Pro equivalent capability-tier',
+      badge: '98.5% semantic accuracy'
+    },
+    {
+      capability: 'CROSS-FRAMEWORK PROJECTION LAYER',
+      demand: 'Simultaneously translate the verified state models into React TSX, Postgres tables, and Specs.',
+      engine: 'MULTI-TARGET SYNTHESIS SYSTEM',
+      tier: 'Claude-3.5-Sonnet equivalent capability-tier',
+      badge: 'Instantly synced'
+    },
+    {
+      capability: 'CONSTITUTIONAL BOUNDARY COMPLIANCE',
+      demand: 'Audit all projected codes against governance regulations and security mandates.',
+      engine: 'STATIC RULES ENFORCER',
+      tier: 'GPT-4o equivalent capability-tier',
+      badge: '100% compliance certified'
+    }
+  ]
+};
 
 export default function IntentTranslator() {
   const { perspective, addLog } = useRuntime();
@@ -598,6 +674,105 @@ describe('${name} Core Verification', () => {
             <span>Core Hash: SHA256_{activePreset.id.substring(0, 4)}_{activePreset.canonical.systemName.length}AA</span>
             <span>Enforced by Arg Anchor sovereign services</span>
           </div>
+        </div>
+      </div>
+
+      {/* Stage 1.5: Capability-Oriented Orchestration (Interchangeable Model Routing) */}
+      <div className="bg-[#0A0A0A] border border-[#111] rounded-lg p-5 space-y-4 relative overflow-hidden" id="capability-orchestration-panel">
+        <div className="absolute top-0 right-0 w-60 h-60 bg-yellow-500/5 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#111] pb-3 gap-3">
+          <div>
+            <span className="text-[10px] font-mono text-[#FFD700] uppercase font-bold tracking-wider block">
+              Stage 1.5: Capability-Oriented Orchestration
+            </span>
+            <h3 className="text-xs font-mono font-bold text-white uppercase mt-0.5 tracking-wider flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-[#FFD700]" />
+              State-Governed Capability Router (Piece together capabilities, not identities)
+            </h3>
+          </div>
+          <span className="text-[9px] font-mono text-emerald-400 bg-emerald-950/20 border border-emerald-900/30 px-2 py-0.5 rounded font-extrabold uppercase flex items-center gap-1.5 animate-pulse">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            Unified State Core Preserved
+          </span>
+        </div>
+
+        <p className="text-[11px] text-gray-400 leading-normal font-sans">
+          Instead of treating models as rigid identities (e.g. GPT, Claude, Gemini), the ARG runtime decomposes your core intent into <strong className="text-white font-mono uppercase text-[10px]">granular capability demands</strong>. Each demand is dynamically routed to the optimal interchangeable execution engine, keeping your project's governed state perfectly continuous across models and sessions.
+        </p>
+
+        {/* Visual Columns: Decompose, Route, Reconcile */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
+          
+          {/* Decomposed Demands List (6 cols) */}
+          <div className="lg:col-span-8 space-y-2.5">
+            <div className="flex items-center gap-2 text-[9.5px] font-mono text-gray-500 uppercase border-b border-[#111] pb-1.5 font-bold">
+              <Shuffle className="w-3.5 h-3.5 text-[#FFD700]" />
+              Dynamic Capability-Demand Breakdown
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {(CAPABILITY_ORCHESTRATION_DATA[activePreset.id] || CAPABILITY_ORCHESTRATION_DATA.custom).map((item, index) => (
+                <div key={index} className="bg-[#050505] border border-[#222] p-3 rounded flex flex-col justify-between hover:border-amber-500/40 transition-all duration-300 group">
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-start gap-1">
+                      <span className="text-[9px] font-mono font-bold text-[#FFD700] uppercase tracking-tight leading-tight block truncate">
+                        {item.capability}
+                      </span>
+                      <span className="text-[7.5px] bg-white/10 text-white border border-white/20 px-1 py-0.2 rounded font-mono uppercase font-bold shrink-0">
+                        P{index + 1}
+                      </span>
+                    </div>
+                    <p className="text-[9.5px] text-gray-400 font-mono leading-tight">
+                      {item.demand}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-[#111] pt-2 mt-2 space-y-1">
+                    <div className="flex items-center justify-between text-[7px] font-mono text-gray-500 uppercase">
+                      <span>Mapped Engine</span>
+                      <span className="text-emerald-400 font-bold">{item.badge}</span>
+                    </div>
+                    <div className="text-[8.5px] font-mono text-gray-300 truncate font-semibold block uppercase">
+                      {item.engine}
+                    </div>
+                    <div className="text-[7.5px] font-mono text-gray-600 block truncate">
+                      {item.tier}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Core State Reconciliation Panel (4 cols) */}
+          <div className="lg:col-span-4 bg-[#050505] border border-[#222] p-4 rounded flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center gap-1.5 text-[9.5px] font-mono text-gray-500 uppercase border-b border-[#111] pb-1.5 font-bold">
+                <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                Governed State Core
+              </div>
+
+              <div className="bg-[#0C0C0C] p-3 rounded border border-emerald-950/40 space-y-1.5">
+                <div className="flex justify-between items-center text-[9px] font-mono text-emerald-400 font-bold">
+                  <span>UNIFIED PROJECT MEMORY</span>
+                  <span className="text-[8px] bg-emerald-950/40 text-emerald-400 border border-emerald-900/40 px-1 rounded uppercase font-bold">ACTIVE</span>
+                </div>
+                <p className="text-[10px] text-gray-400 leading-normal font-sans">
+                  The active runtime preserves every decision, entity rule, and constraint as structured state memory. Session limits or switching models will never lose context.
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-[#111] pt-3 mt-3 flex items-center justify-between text-[8px] font-mono text-gray-500">
+              <div className="flex items-center gap-1.5">
+                <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
+                <span>RECONCILIATOR: NOMINAL</span>
+              </div>
+              <span className="text-gray-600 uppercase">SYNC RATE: 100%</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
