@@ -33,8 +33,9 @@ import KnowledgeObjectsPanel from './components/KnowledgeObjectsPanel';
 import CapabilityRegistryPanel from './components/CapabilityRegistryPanel';
 import GovernancePanel from './components/GovernancePanel';
 import RestorationPanel from './components/RestorationPanel';
+import HomePanel from './components/HomePanel';
 
-type ActiveTab = 'STATE' | 'MEMORY' | 'REGISTRY' | 'GOVERNANCE' | 'RESTORATION';
+type ActiveTab = 'HOME' | 'STATE' | 'MEMORY' | 'REGISTRY' | 'GOVERNANCE' | 'RESTORATION';
 
 const EXPLANATION_DATA: Record<string, {
   title: string;
@@ -95,7 +96,7 @@ const EXPLANATION_DATA: Record<string, {
 };
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('STATE');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('HOME');
   const [utcTime, setUtcTime] = useState<string>('');
 
   const {
@@ -474,6 +475,20 @@ function AppContent() {
             <nav className="flex border-b border-[#222] gap-1 overflow-x-auto scrollbar-none animate-fade-in" id="dashboard-navigation">
               <button
                 onClick={() => {
+                  setActiveTab('HOME');
+                  addLog('Accessing Workspace Home dashboard.', 'INFO', 'SPINE');
+                }}
+                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
+                  activeTab === 'HOME'
+                    ? 'border-[#FFD700] text-[#FFD700] bg-[#FFD700]/5'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5" />
+                HOME
+              </button>
+              <button
+                onClick={() => {
                   setActiveTab('STATE');
                   addLog(perspective === 'customer' ? 'Accessing System Alignment Service.' : 'Accessing Operational State Service (Pillar 1).', 'INFO', 'SPINE');
                 }}
@@ -546,6 +561,10 @@ function AppContent() {
 
             {/* Dynamic Panel Frame */}
             <div className="min-h-[460px]">
+              {activeTab === 'HOME' && <HomePanel onNavigate={(tab) => {
+                setActiveTab(tab);
+                addLog(perspective === 'customer' ? `Navigated to ${tab} panel.` : `Workspace navigation: shifted focus to ${tab} service.`, 'INFO', 'SPINE');
+              }} />}
               {activeTab === 'STATE' && <OperationalStatePanel />}
               {activeTab === 'MEMORY' && <KnowledgeObjectsPanel />}
               {activeTab === 'REGISTRY' && <CapabilityRegistryPanel />}
