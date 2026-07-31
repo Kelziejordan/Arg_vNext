@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   ShieldAlert,
   Activity,
@@ -27,13 +27,14 @@ import {
   Sparkles
 } from 'lucide-react';
 
-import { SystemMetric, SystemLog, PriorityGoal } from './types';
+import { RuntimeProvider, useRuntime } from './core/RuntimeContext';
 import OperationalStatePanel from './components/OperationalStatePanel';
 import KnowledgeObjectsPanel from './components/KnowledgeObjectsPanel';
-import WorkspacePanel from './components/WorkspacePanel';
 import CapabilityRegistryPanel from './components/CapabilityRegistryPanel';
+import GovernancePanel from './components/GovernancePanel';
+import RestorationPanel from './components/RestorationPanel';
 
-type ActiveTab = 'STATE' | 'MEMORY' | 'COCKPIT' | 'EXECUTION';
+type ActiveTab = 'STATE' | 'MEMORY' | 'REGISTRY' | 'GOVERNANCE' | 'RESTORATION';
 
 const EXPLANATION_DATA: Record<string, {
   title: string;
@@ -93,15 +94,27 @@ const EXPLANATION_DATA: Record<string, {
   }
 };
 
-export default function App() {
+function AppContent() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('STATE');
-  const [operatingState, setOperatingState] = useState<'SHIP' | 'FREEZE' | 'EXPAND'>('SHIP');
   const [utcTime, setUtcTime] = useState<string>('');
 
-  // Lifted states for full-stack system interaction
-  const [confidence, setConfidence] = useState<number>(0.95);
-  const [isReconstructing, setIsReconstructing] = useState<boolean>(false);
-  const [reconstructionStep, setReconstructionStep] = useState<number>(0);
+  const {
+    metrics,
+    operatingState,
+    transitionOperatingState,
+    confidence,
+    setConfidence,
+    isReconstructing,
+    triggerReconstruction,
+    goals,
+    toggleGoalStatus,
+    logs,
+    addLog,
+    addLedgerEvent,
+    triggerScenario,
+    perspective,
+    setPerspective
+  } = useRuntime();
 
   // Administrative / Stress Testing States
   const [adminAuthenticated, setAdminAuthenticated] = useState<boolean>(false);
@@ -118,101 +131,14 @@ export default function App() {
   // Explanation side-panel state
   const [infoPaneContent, setInfoPaneContent] = useState<typeof EXPLANATION_DATA[keyof typeof EXPLANATION_DATA] | null>(null);
 
-  // Core system metrics
-  const [metrics, setMetrics] = useState<SystemMetric>({
-    speed: 14,             // ms per execution
-    leverage: 9.35,        // ratio
-    correctness: 100,      // percentage
-    continuity: 98,        // percentage
-    metabolicCost: 45      // compute index
-  });
-
-  // Active goals list
-  const [goals, setGoals] = useState<PriorityGoal[]>([
-    {
-      id: 'G1',
-      priority: 'P0',
-      title: 'Maintain Frozen Core Alignment',
-      status: 'ACTIVE',
-      description: 'Synchronizing Layer 1 DNA hashes with Reflex compiler passes.'
-    },
-    {
-      id: 'G2',
-      priority: 'P1',
-      title: 'Analyze User Architectural Queries',
-      status: 'ACTIVE',
-      description: 'Listening on /api/chat cognitive port to evaluate design plans.'
-    },
-    {
-      id: 'G3',
-      priority: 'P2',
-      title: 'Refactor Legacy Code Segments',
-      status: 'PENDING',
-      description: 'Applying Mandate 1 State Determinism across historical modules.'
-    }
-  ]);
-
-  // Telemetry logs list
-  const [logs, setLogs] = useState<SystemLog[]>([]);
-
-  // Function to push a live system log
-  const addLog = useCallback((message: string, level: SystemLog['level'] = 'INFO', source: SystemLog['source'] = 'SPINE') => {
-    const newLog: SystemLog = {
-      id: `L_${Math.random().toString(36).substring(2, 9)}`,
-      timestamp: new Date().toLocaleTimeString(),
-      level,
-      source,
-      message
-    };
-    setLogs(prev => [newLog, ...prev].slice(0, 50)); // limit to last 50 logs
-  }, []);
-
   // Set explanation drawer content
   const handleShowExplanation = (area: string) => {
     const data = EXPLANATION_DATA[area];
     if (data) {
       setInfoPaneContent(data);
-      addLog(`Inspecting system area: [${data.title}] for pedagogical context.`, 'INFO', 'GOVERNOR');
+      addLog(`Inspecting system area: [${data.concept}] for pedagogical context.`, 'INFO', 'GOVERNOR');
     }
   };
-
-  // Run core reconstruction loop
-  const triggerReconstruction = useCallback(() => {
-    setIsReconstructing(true);
-    setReconstructionStep(1);
-    addLog('Confidence Score fell below threshold (0.50). Triggering Reconstruction Sequence...', 'RECONSTRUCT', 'SPINE');
-
-    const steps = [
-      'Locking execution branches...',
-      'Isolating compromised runtime modules...',
-      'Loading Immutable Seed from the Frozen Core...',
-      'Recalibrating Reflex Core integrity hashes...',
-      'Deploying IVP Verification Handshakes...',
-      'Re-establishing baseline systemic coherence...',
-      'Purging semantic drift pathogens...'
-    ];
-
-    let currentStep = 1;
-    const interval = setInterval(() => {
-      if (currentStep <= steps.length) {
-        addLog(`[RECONSTRUCT ${currentStep}/7] ${steps[currentStep - 1]}`, 'SYSTEM', 'SEED');
-        setReconstructionStep(currentStep);
-        currentStep++;
-      } else {
-        clearInterval(interval);
-        setConfidence(0.98);
-        setIsReconstructing(false);
-        setReconstructionStep(0);
-        setMetrics(prev => ({
-          ...prev,
-          correctness: 100,
-          continuity: 100,
-          metabolicCost: prev.metabolicCost + 15
-        }));
-        addLog('Reconstruction sequence complete. Baseline re-established at 98% integrity.', 'INFO', 'SPINE');
-      }
-    }, 800);
-  }, [addLog]);
 
   // Handle password submission for admin panel
   const handleAdminAuthSubmit = (e: React.FormEvent) => {
@@ -269,7 +195,7 @@ export default function App() {
         return Math.max(2, Math.min(64, base + delta));
       });
 
-      // Stream fake container logs if authenticated
+      // Stream sandbox logs if authenticated
       if (adminAuthenticated) {
         const standardLogs = [
           `[CONTAINER] Thread supervisor health check: PASS`,
@@ -307,60 +233,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Initialize logs on boot
-  useEffect(() => {
-    addLog('ARGUS OMEGA V12 Kernel Boot Sequence initialized.', 'SYSTEM', 'SEED');
-    addLog('Frozen Core rules fully locked. Read-Modify-Write enabled.', 'SYSTEM', 'SEED');
-    addLog('Continuity Spine is operational. Establishing IVP handshake listeners.', 'INFO', 'SPINE');
-    addLog('Apex execution engine loaded. 17 Processes warmed.', 'INFO', 'APEX');
-    addLog('Operating system entered SHIP state: Ready for user requests.', 'INFO', 'GOVERNOR');
-  }, [addLog]);
-
-  // Adjust metrics based on overall operating states
-  const transitionOperatingState = (state: 'SHIP' | 'FREEZE' | 'EXPAND') => {
-    setOperatingState(state);
-    addLog(`System state transitioning: [${operatingState}] ➔ [${state}]`, 'SYSTEM', 'GOVERNOR');
-
-    if (state === 'FREEZE') {
-      addLog('FREEZE ACTIVATE: Locking code mutations. Speed prioritized.', 'WARN', 'GOVERNOR');
-      setMetrics(prev => ({
-        ...prev,
-        speed: 8,
-        correctness: 100,
-        continuity: 100,
-        metabolicCost: Math.max(10, prev.metabolicCost - 15)
-      }));
-    } else if (state === 'EXPAND') {
-      addLog('EXPAND ACTIVATE: Cognitive capacity expanded. Incremental metabolic cost.', 'INFO', 'GOVERNOR');
-      setMetrics(prev => ({
-        ...prev,
-        speed: 22,
-        leverage: +(prev.leverage + 1.25).toFixed(2),
-        metabolicCost: prev.metabolicCost + 25
-      }));
-    } else {
-      addLog('SHIP ACTIVATE: Re-established default agile delivery parameters.', 'INFO', 'GOVERNOR');
-      setMetrics({
-        speed: 14,
-        leverage: 9.35,
-        correctness: 100,
-        continuity: 98,
-        metabolicCost: 45
-      });
-    }
-  };
-
-  const toggleGoalStatus = (id: string) => {
-    setGoals(prev => prev.map(g => {
-      if (g.id === id) {
-        const nextStatus = g.status === 'ACTIVE' ? 'BLOCKED' : g.status === 'BLOCKED' ? 'PENDING' : 'ACTIVE';
-        addLog(`Goal ${g.id} status modified to [${nextStatus}]`, 'WARN', 'SPINE');
-        return { ...g, status: nextStatus };
-      }
-      return g;
-    }));
-  };
-
   return (
     <div className="min-h-screen bg-[#020202] text-gray-300 p-4 md:p-6 flex flex-col font-sans selection:bg-[#FFD700]/30 selection:text-white" id="main-container">
       
@@ -383,6 +255,32 @@ export default function App() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3.5">
+          {/* Global UI Perspective Switch */}
+          <div className="bg-[#050505] border border-[#222] rounded p-0.5 flex gap-1 items-center">
+            <button
+              onClick={() => {
+                setPerspective('customer');
+                addLog('Interface terminology switched to Customer perspective.', 'INFO', 'GOVERNOR');
+              }}
+              className={`text-[10px] font-mono font-bold px-3 py-1 rounded transition cursor-pointer ${
+                perspective === 'customer' ? 'bg-[#FFD700] text-black shadow-[0_0_8px_rgba(255,215,0,0.2)]' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              CUSTOMER
+            </button>
+            <button
+              onClick={() => {
+                setPerspective('architect');
+                addLog('Interface terminology switched to Architect perspective.', 'INFO', 'GOVERNOR');
+              }}
+              className={`text-[10px] font-mono font-bold px-3 py-1 rounded transition cursor-pointer ${
+                perspective === 'architect' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              ARCHITECT
+            </button>
+          </div>
+
           {/* UTC Clock */}
           <div className="bg-[#0A0A0A] border border-[#222] px-3 py-1.5 rounded flex items-center gap-2 font-mono text-xs">
             <Clock className="w-3.5 h-3.5 text-[#FFD700]" />
@@ -442,7 +340,7 @@ export default function App() {
         {/* Telemetry Ribbon */}
         <section 
           onClick={() => handleShowExplanation('ribbon')}
-          className="bg-[#0A0A0A] border border-[#222] rounded p-4 flex flex-col md:flex-row gap-4 items-center justify-between hover:border-[#FFD700]/30 hover:shadow-[0_0_12px_rgba(255,215,0,0.03)] cursor-pointer transition-all duration-300 group"
+          className="bg-[#0A0A0A] border border-[#222] rounded p-4 flex flex-col md:flex-row gap-4 items-center justify-between hover:border-[#FFD700]/30 hover:shadow-[0_0_12px_rgba(255,215,0,0.03)] cursor-pointer transition-all duration-300 group shadow-lg"
           id="telemetry-ribbon"
         >
           <div className="flex items-center gap-3 w-full md:w-auto">
@@ -487,8 +385,8 @@ export default function App() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveTab('ORACLE');
-                  addLog('Sentinel Feed Deep Inspect triggered. Focusing Cognitive Oracle.', 'INFO', 'SPINE');
+                  setActiveTab('STATE');
+                  addLog('Sentinel Feed Deep Inspect triggered. Focusing Operational State Panel.', 'INFO', 'SPINE');
                 }}
                 className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#FFD700]/10 hover:bg-[#FFD700] hover:text-black border border-[#FFD700]/30 text-[#FFD700] px-3 py-1 rounded transition flex items-center gap-1 shrink-0"
               >
@@ -547,13 +445,13 @@ export default function App() {
           {/* Main Console Focus Area (9 Columns) */}
           <section className="lg:col-span-9 flex flex-col space-y-6">
             {/* Nav tabs bar */}
-            <nav className="flex border-b border-[#222] gap-1 overflow-x-auto scrollbar-none" id="dashboard-navigation">
+            <nav className="flex border-b border-[#222] gap-1 overflow-x-auto scrollbar-none animate-fade-in" id="dashboard-navigation">
               <button
                 onClick={() => {
                   setActiveTab('STATE');
-                  addLog('Accessing Operational State Workspace (Pillar 1).', 'INFO', 'SPINE');
+                  addLog('Accessing Operational State Service (Pillar 1).', 'INFO', 'SPINE');
                 }}
-                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 ${
+                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
                   activeTab === 'STATE'
                     ? 'border-[#FFD700] text-[#FFD700] bg-[#FFD700]/5'
                     : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -565,9 +463,9 @@ export default function App() {
               <button
                 onClick={() => {
                   setActiveTab('MEMORY');
-                  addLog('Accessing Knowledge Objects Explorer (Pillar 2).', 'INFO', 'SPINE');
+                  addLog('Accessing Knowledge Objects Service (Pillar 2).', 'INFO', 'SPINE');
                 }}
-                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 ${
+                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
                   activeTab === 'MEMORY'
                     ? 'border-[#FFD700] text-[#FFD700] bg-[#FFD700]/5'
                     : 'border-transparent text-gray-500 hover:text-gray-300'
@@ -578,25 +476,11 @@ export default function App() {
               </button>
               <button
                 onClick={() => {
-                  setActiveTab('COCKPIT');
-                  addLog('Entering Split-Screen Workspace Cockpit (Pillar 3).', 'INFO', 'SPINE');
+                  setActiveTab('REGISTRY');
+                  addLog('Accessing Capability Registry Service (Pillar 4).', 'INFO', 'SPINE');
                 }}
-                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 ${
-                  activeTab === 'COCKPIT'
-                    ? 'border-[#FFD700] text-[#FFD700] bg-[#FFD700]/5'
-                    : 'border-transparent text-gray-500 hover:text-gray-300'
-                }`}
-              >
-                <Compass className="w-3.5 h-3.5" />
-                WORKSPACE COCKPIT
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('EXECUTION');
-                  addLog('Accessing Capability Registry & Pipeline Execution (Pillar 4).', 'INFO', 'SPINE');
-                }}
-                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 ${
-                  activeTab === 'EXECUTION'
+                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
+                  activeTab === 'REGISTRY'
                     ? 'border-[#FFD700] text-[#FFD700] bg-[#FFD700]/5'
                     : 'border-transparent text-gray-500 hover:text-gray-300'
                 }`}
@@ -604,37 +488,43 @@ export default function App() {
                 <GitBranch className="w-3.5 h-3.5" />
                 CAPABILITY REGISTRY
               </button>
+              <button
+                onClick={() => {
+                  setActiveTab('GOVERNANCE');
+                  addLog('Entering Policy & Constitutional Governance (Pillar 3).', 'INFO', 'SPINE');
+                }}
+                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
+                  activeTab === 'GOVERNANCE'
+                    ? 'border-[#FFD700] text-[#FFD700] bg-[#FFD700]/5'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                GOVERNANCE
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('RESTORATION');
+                  addLog('Accessing Restoration & Reflex Reconstruction (Pillar 5).', 'INFO', 'SPINE');
+                }}
+                className={`px-4 py-2.5 text-xs font-mono font-semibold transition border-b-2 flex items-center gap-2 shrink-0 cursor-pointer ${
+                  activeTab === 'RESTORATION'
+                    ? 'border-[#FFD700] text-[#FFD700] bg-[#FFD700]/5'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                RESTORATION
+              </button>
             </nav>
 
             {/* Dynamic Panel Frame */}
             <div className="min-h-[460px]">
-              {activeTab === 'STATE' && (
-                <OperationalStatePanel
-                  metrics={metrics}
-                  onUpdateMetrics={setMetrics}
-                  onAddLog={addLog}
-                  confidence={confidence}
-                  setConfidence={setConfidence}
-                  operatingState={operatingState}
-                />
-              )}
-              {activeTab === 'MEMORY' && (
-                <KnowledgeObjectsPanel
-                  onAddLog={addLog}
-                />
-              )}
-              {activeTab === 'COCKPIT' && (
-                <WorkspacePanel
-                  metrics={metrics}
-                  onUpdateMetrics={setMetrics}
-                  onAddLog={addLog}
-                />
-              )}
-              {activeTab === 'EXECUTION' && (
-                <CapabilityRegistryPanel
-                  onAddLog={addLog}
-                />
-              )}
+              {activeTab === 'STATE' && <OperationalStatePanel />}
+              {activeTab === 'MEMORY' && <KnowledgeObjectsPanel />}
+              {activeTab === 'REGISTRY' && <CapabilityRegistryPanel />}
+              {activeTab === 'GOVERNANCE' && <GovernancePanel />}
+              {activeTab === 'RESTORATION' && <RestorationPanel />}
             </div>
           </section>
 
@@ -652,7 +542,7 @@ export default function App() {
               </div>
 
               {/* Goal Priority list */}
-              <div className="space-y-3 flex-grow overflow-y-auto pr-1">
+              <div className="space-y-3 flex-grow overflow-y-auto pr-1 scrollbar-thin">
                 {goals.map((goal) => (
                   <div key={goal.id} className="bg-[#111] border border-[#222] p-3 rounded space-y-1 relative hover:border-[#333] transition-colors">
                     <div className="flex justify-between items-start">
@@ -667,7 +557,7 @@ export default function App() {
 
                       <button
                         onClick={() => toggleGoalStatus(goal.id)}
-                        className={`text-[8px] font-mono font-black uppercase px-1.5 py-0.5 rounded border transition shrink-0 ${
+                        className={`text-[8px] font-mono font-black uppercase px-1.5 py-0.5 rounded border transition shrink-0 cursor-pointer ${
                           goal.status === 'ACTIVE'
                             ? 'bg-[#FFD700]/15 border-[#FFD700]/30 text-[#FFD700]'
                             : goal.status === 'BLOCKED'
@@ -684,7 +574,7 @@ export default function App() {
               </div>
 
               <div className="mt-2 pt-2 border-t border-[#222] text-center">
-                <p className="text-[9px] font-mono text-gray-600">
+                <p className="text-[9px] font-mono text-gray-600 leading-tight">
                   Click goal status tag to cycle priorities or mock resolve events.
                 </p>
               </div>
@@ -726,7 +616,7 @@ export default function App() {
                   </div>
 
                   <p className="text-[9px] font-mono text-gray-500 leading-normal bg-[#111] border border-[#222] p-2.5 rounded">
-                    Hint: Use standard passcode <span className="text-[#FFD700] font-bold">omega12</span> or click bypass below to access live container stressors and stress allocations.
+                    Hint: Use standard passcode <span className="text-[#FFD700] font-bold">omega12</span> or click bypass below to access live container stressors.
                   </p>
 
                   <div className="flex gap-2 pt-2">
@@ -786,7 +676,7 @@ export default function App() {
                             addLog('⚠️ A reconstruction is already running or integrity is already degraded.', 'WARN', 'GOVERNOR');
                           }
                         }}
-                        className={`w-full text-left text-[10px] font-mono px-2.5 py-1.5 rounded border transition flex items-center justify-between ${
+                        className={`w-full text-left text-[10px] font-mono px-2.5 py-1.5 rounded border transition flex items-center justify-between cursor-pointer ${
                           confidence < 0.5
                             ? 'bg-red-500/15 border-red-500/30 text-red-400 cursor-not-allowed'
                             : 'bg-[#111] hover:bg-[#1A1A1A] border-[#222] text-[#FFD700]'
@@ -802,9 +692,13 @@ export default function App() {
                         onClick={() => {
                           const next = !isStressTesting;
                           setIsStressTesting(next);
-                          addLog(next ? '⚠️ Load booster active. Active thread allocation scaled to 36 threads.' : 'Nominal load re-established. Thread allocation cleared.', next ? 'WARN' : 'INFO', 'GOVERNOR');
+                          if (next) {
+                            triggerScenario('VOLATILITY_BURST');
+                          } else {
+                            addLog('Nominal load re-established. Thread allocation cleared.', 'INFO', 'GOVERNOR');
+                          }
                         }}
-                        className={`w-full text-left text-[10px] font-mono px-2.5 py-1.5 rounded border transition flex items-center justify-between ${
+                        className={`w-full text-left text-[10px] font-mono px-2.5 py-1.5 rounded border transition flex items-center justify-between cursor-pointer ${
                           isStressTesting
                             ? 'bg-red-500/15 border-red-500/30 text-red-400'
                             : 'bg-[#111] hover:bg-[#1A1A1A] border-[#222] text-white'
@@ -819,9 +713,10 @@ export default function App() {
                         onClick={() => {
                           setConfidence(0.98);
                           setIsStressTesting(false);
-                          addLog('Administrative manual override: Core state reset to stable state.', 'INFO', 'GOVERNOR');
+                          addLog('Administrative override: Resetting core status variables.', 'INFO', 'GOVERNOR');
+                          addLedgerEvent('ADMIN_CLEAR_STRESS_VECTORS');
                         }}
-                        className="w-full text-left text-[10px] font-mono bg-[#111] hover:bg-[#1A1A1A] border border-[#222] text-[#FFD700] px-2.5 py-1.5 rounded transition flex items-center justify-between"
+                        className="w-full text-left text-[10px] font-mono bg-[#111] hover:bg-[#1A1A1A] border border-[#222] text-[#FFD700] px-2.5 py-1.5 rounded transition flex items-center justify-between cursor-pointer"
                       >
                         <span>[3] CLEAR STRESS VECTORS</span>
                         <RefreshCw className="w-3 h-3 text-[#FFD700]" />
@@ -863,7 +758,7 @@ export default function App() {
         </div>
 
         {/* Global Telemetry Live Log Flow */}
-        <footer className="bg-[#0A0A0A] border border-[#222] rounded p-4 flex flex-col space-y-2 shrink-0">
+        <footer className="bg-[#0A0A0A] border border-[#222] rounded p-4 flex flex-col space-y-2 shrink-0 shadow-inner">
           <div className="flex justify-between items-center border-b border-[#222] pb-1.5">
             <span className="text-[10px] font-mono text-gray-400 flex items-center gap-1.5 uppercase tracking-wider">
               <Database className="w-3.5 h-3.5 text-[#FFD700]" />
@@ -872,7 +767,7 @@ export default function App() {
             <span className="text-[9px] font-mono text-gray-600">Buffer state: OK</span>
           </div>
 
-          <div className="h-24 overflow-y-auto font-mono text-[9px] text-gray-400 space-y-1 pr-2">
+          <div className="h-24 overflow-y-auto font-mono text-[9px] text-gray-400 space-y-1 pr-2 scrollbar-thin">
             {logs.map((log) => (
               <div key={log.id} className="flex gap-2 items-start leading-relaxed border-b border-[#111] pb-0.5 animate-fade-in">
                 <span className="text-gray-600 shrink-0">[{log.timestamp}]</span>
@@ -898,7 +793,7 @@ export default function App() {
           >
             <button 
               onClick={() => setInfoPaneContent(null)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-white border border-[#222] hover:border-gray-700 p-1.5 rounded transition text-xs font-mono"
+              className="absolute top-4 right-4 text-gray-500 hover:text-white border border-[#222] hover:border-gray-700 p-1.5 rounded transition text-xs font-mono cursor-pointer"
             >
               [CLOSE ESC]
             </button>
@@ -943,5 +838,13 @@ export default function App() {
       )}
 
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <RuntimeProvider>
+      <AppContent />
+    </RuntimeProvider>
   );
 }

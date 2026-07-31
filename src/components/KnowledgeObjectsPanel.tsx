@@ -1,3 +1,8 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState } from 'react';
 import {
   BookOpen,
@@ -18,146 +23,18 @@ import {
   Terminal,
   Upload
 } from 'lucide-react';
-import { SystemLog } from '../types';
+import { useRuntime, KnowledgeObject } from '../core/RuntimeContext';
 
-interface KnowledgeObjectsPanelProps {
-  onAddLog: (message: string, level: SystemLog['level'], source: SystemLog['source']) => void;
-}
+export default function KnowledgeObjectsPanel() {
+  const {
+    knowledgeVault,
+    addKnowledgeObject,
+    addLog,
+    addLedgerEvent
+  } = useRuntime();
 
-interface KnowledgeObject {
-  id: string;
-  title: string;
-  type: 'Principle' | 'Specification' | 'ADR' | 'Capability' | 'Mechanism' | 'Workflow' | 'Decision' | 'Review' | 'Breakthrough';
-  status: 'Draft' | 'Review' | 'Frozen' | 'Deprecated';
-  owner: string;
-  version: string;
-  created: string;
-  modified: string;
-  purpose: string;
-  provenance: {
-    createdBy: string;
-    sourceRefs: string[];
-    usedIn: string[];
-    validationNotes: string;
-  };
-  details: string;
-}
-
-export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPanelProps) {
   const [selectedCategory, setSelectedCategory] = useState<'ALL' | 'PRINCIPLE' | 'ADR' | 'SPEC' | 'BREAKTHROUGH'>('ALL');
   const [selectedObject, setSelectedObject] = useState<KnowledgeObject | null>(null);
-  
-  // Knowledge objects library
-  const [knowledgeVault, setKnowledgeVault] = useState<KnowledgeObject[]>([
-    {
-      id: 'KP-001',
-      title: 'State Determinism Rule',
-      type: 'Principle',
-      status: 'Frozen',
-      owner: 'ARG Product',
-      version: 'v1.0.0',
-      created: '2026-06-15',
-      modified: '2026-07-28',
-      purpose: 'Enforces complete, unambiguous union state models for async flows.',
-      provenance: {
-        createdBy: 'Principal Operator',
-        sourceRefs: ['ADR-001', 'BOOT.md'],
-        usedIn: ['App.tsx', 'MandateValidator.tsx'],
-        validationNotes: 'Strict compiler verification has been successfully executed.'
-      },
-      details: 'All state transitions related to asynchronous resource fetches MUST use the RemoteData<T> union type. Explicitly prevents concurrent state bugs, race conditions, and split boolean load flags.'
-    },
-    {
-      id: 'ADR-004',
-      title: 'BOOT.md as Canonical Operational Source',
-      type: 'ADR',
-      status: 'Frozen',
-      owner: 'ARG Product',
-      version: 'v1.2.0',
-      created: '2026-07-20',
-      modified: '2026-07-30',
-      purpose: 'Establishes BOOT.md as the absolute single source of truth for runtime boots and session continuity.',
-      provenance: {
-        createdBy: 'Architect Reviewer',
-        sourceRefs: ['ADR-002', 'Arg update 1'],
-        usedIn: ['ContinuityManager.ts', 'server.ts'],
-        validationNotes: 'Approved as a mandatory compliance contract.'
-      },
-      details: 'Durable session checkpoints are fully integrated into BOOT.md session states, effectively replacing separate, un-versioned recovery snapshots.'
-    },
-    {
-      id: 'ADR-005',
-      title: 'Sovereign State Refresh Requirement',
-      type: 'ADR',
-      status: 'Frozen',
-      owner: 'ARG Product',
-      version: 'v1.0.1',
-      created: '2026-07-22',
-      modified: '2026-07-30',
-      purpose: 'Enforces that every active development session ends cleanly with a State Refresh.',
-      provenance: {
-        createdBy: 'Systems Architect',
-        sourceRefs: ['Arg update 2', 'BOOT.md'],
-        usedIn: ['App.tsx', 'OperationalStatePanel.tsx'],
-        validationNotes: 'Ensures absolute alignment of working branches prior to shutdown.'
-      },
-      details: 'A State Refresh analyzes contextual parameters, logs active decisions to the event ledger, and packages context states to resist model memory loss.'
-    },
-    {
-      id: 'AD-006',
-      title: 'Capture and Defer Architectural Ideas',
-      type: 'ADR',
-      status: 'Frozen',
-      owner: 'ARG Product',
-      version: 'v1.0.0',
-      created: '2026-07-25',
-      modified: '2026-07-30',
-      purpose: 'Prevents implementation interruption by systematically capturing and deferring interesting ideas.',
-      provenance: {
-        createdBy: 'Advisor',
-        sourceRefs: ['ADR-003', 'Arg update 2'],
-        usedIn: ['KnowledgeObjectsPanel.tsx', 'FutureOpportunities'],
-        validationNotes: 'Keeps implementation scopes highly clean and tightly scoped.'
-      },
-      details: 'Provides a structured Research Queue where deferred concepts are audited and validated prior to merging with the platform core.'
-    },
-    {
-      id: 'KP-002',
-      title: 'Zero-Trust Data Boundaries',
-      type: 'Principle',
-      status: 'Frozen',
-      owner: 'ARG Product',
-      version: 'v1.0.0',
-      created: '2026-05-10',
-      modified: '2026-07-30',
-      purpose: 'Requires strict runtime parsing and schemas at all data entry barriers.',
-      provenance: {
-        createdBy: 'AARA Agent',
-        sourceRefs: ['Constitutional Laws'],
-        usedIn: ['schemas/', 'MandateValidator.tsx'],
-        validationNotes: 'Verified via Valibot static semantic checkers.'
-      },
-      details: 'TypeScript types exist only at build-time. We must enforce strict runtime schema-matching (Zod/Valibot) for all external streams (APIs, URLs, storage) prior to state acceptance.'
-    },
-    {
-      id: 'AB-001',
-      title: 'Persistent Cognitive Continuity Engine',
-      type: 'Breakthrough',
-      status: 'Review',
-      owner: 'ARG Product',
-      version: 'v2.1.0',
-      created: '2026-06-20',
-      modified: '2026-07-30',
-      purpose: 'Preserves system operational context and execution variables across developer shutdowns.',
-      provenance: {
-        createdBy: 'Lead Engineer',
-        sourceRefs: ['TEP-V12-OMEGA-FINAL', 'TS-001'],
-        usedIn: ['App.tsx', 'CapabilityRegistryPanel.tsx'],
-        validationNotes: 'Validated under TS-001 (The Void) stress harness.'
-      },
-      details: 'Achieves near-instant session resume capabilities on mobile by recording and mapping state deltas inside an event-sourced ledger, bypassing raw dialogue retention.'
-    }
-  ]);
 
   // Knowledge Pyramid Level descriptions
   const PYRAMID_LEVELS = [
@@ -180,7 +57,7 @@ export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPane
     setIsExtracting(true);
     setNewlyExtractedObject(null);
     setExtractionProgress('Initializing cognitive parser...');
-    onAddLog('Initiating architectural recovery from input dialogue buffer...', 'RECONSTRUCT', 'SPINE');
+    addLog('Initiating architectural recovery from input dialogue buffer...', 'RECONSTRUCT', 'SPINE');
 
     const steps = [
       'Extracting core engineering decisions and judgments...',
@@ -198,18 +75,15 @@ export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPane
       } else {
         clearInterval(interval);
         
-        // Formulate a beautiful extracted ADR object based on the paste input
-        const randomId = `ADR-${String(knowledgeVault.length + 1).padStart(3, '0')}`;
-        const newObj: KnowledgeObject = {
-          id: randomId,
+        // Setup new extracted object data
+        const nextId = `KP-${String(knowledgeVault.length + 1).padStart(3, '0')}`;
+        const newObj: Omit<KnowledgeObject, 'id' | 'created' | 'modified'> = {
           title: 'Dynamic Capability Gating and Promotion',
           type: 'ADR',
           status: 'Review',
           owner: 'ARG Product',
           version: 'v1.0.0',
-          created: new Date().toISOString().split('T')[0],
-          modified: new Date().toISOString().split('T')[0],
-          purpose: 'Disallows un-vetted capabilities from executing under production-prod environments.',
+          purpose: 'Disallows un-vetted capabilities from executing under production-level environments.',
           provenance: {
             createdBy: 'Decolled Cognitive Ingestor',
             sourceRefs: ['User Paste Buffer', 'AD-006'],
@@ -219,13 +93,21 @@ export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPane
           details: 'Provides a rigid sandbox environment (Mutation Sandboxing) where new behavioral rules and prompt configurations are tested against simulated volatility before formal promotion.'
         };
 
-        setKnowledgeVault([newObj, ...knowledgeVault]);
-        setNewlyExtractedObject(newObj);
+        addKnowledgeObject(newObj);
+        
+        // Simulate retrieval reference
+        const fullObject: KnowledgeObject = {
+          ...newObj,
+          id: nextId,
+          created: new Date().toISOString().split('T')[0],
+          modified: new Date().toISOString().split('T')[0]
+        };
+
+        setNewlyExtractedObject(fullObject);
         setIsExtracting(false);
         setPasteBuffer('');
-        onAddLog(`Architectural Object ${randomId} successfully recovered and committed.`, 'SYSTEM', 'SEED');
       }
-    }, 800);
+    }, 450);
   };
 
   const filteredVault = knowledgeVault.filter((obj) => {
@@ -258,7 +140,7 @@ export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPane
               <div
                 key={lvl.level}
                 onClick={() => {
-                  onAddLog(`Pyramid Layer selected: [${lvl.name}] - Auditing dependencies.`, 'INFO', 'SPINE');
+                  addLog(`Pyramid Layer selected: [${lvl.name}] - Auditing dependencies.`, 'INFO', 'SPINE');
                 }}
                 className={`border p-2 rounded cursor-pointer transition-all hover:bg-[#111]/80 hover:translate-x-1 ${lvl.color}`}
               >
@@ -315,7 +197,7 @@ export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPane
               key={obj.id}
               onClick={() => {
                 setSelectedObject(obj);
-                onAddLog(`Inspecting Knowledge Object: [${obj.id}] ${obj.title}`, 'INFO', 'SPINE');
+                addLog(`Inspecting Knowledge Object: [${obj.id}] ${obj.title}`, 'INFO', 'SPINE');
               }}
               className={`p-3 rounded border text-left cursor-pointer transition-all hover:translate-x-1 ${
                 selectedObject?.id === obj.id
@@ -341,7 +223,7 @@ export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPane
         
         {/* Selected Object Detail Panel */}
         {selectedObject ? (
-          <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-lg flex flex-col justify-between h-[230px] animate-fade-in">
+          <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-lg flex flex-col justify-between h-[230px] animate-fade-in animate-duration-150">
             <div className="flex justify-between items-center border-b border-[#222] pb-2 shrink-0">
               <span className="text-[10px] font-mono text-[#FFD700] uppercase font-bold">{selectedObject.id} Metadata</span>
               <button
@@ -410,8 +292,8 @@ export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPane
             </div>
           ) : newlyExtractedObject ? (
             <div className="flex flex-col justify-between h-full pt-2 animate-fade-in">
-              <div className="flex items-center gap-1.5 text-[9px] font-mono text-emerald-400 bg-emerald-950/20 border border-emerald-900/30 p-1.5 rounded">
-                <CheckCircle className="w-3.5 h-3.5 shrink-0" />
+              <div className="flex items-center gap-1.5 text-[9px] font-mono text-emerald-400 bg-emerald-950/20 border border-emerald-400/15 p-1.5 rounded">
+                <CheckCircle className="w-3.5 h-3.5 shrink-0 animate-pulse" />
                 <span>Object recovered successfully and committed.</span>
               </div>
               <p className="text-[8px] font-mono text-gray-500 italic shrink-0 leading-tight">
@@ -433,7 +315,7 @@ export default function KnowledgeObjectsPanel({ onAddLog }: KnowledgeObjectsPane
                 value={pasteBuffer}
                 onChange={(e) => setPasteBuffer(e.target.value)}
                 placeholder="Paste raw conversation or designer notes here..."
-                className="w-full flex-grow bg-[#050505] text-gray-300 font-mono text-[9px] p-2 focus:outline-none focus:ring-1 focus:ring-red-500/30 resize-none leading-relaxed border border-[#222] rounded"
+                className="w-full flex-grow bg-[#050505] text-gray-300 font-mono text-[9px] p-2 focus:outline-none focus:ring-1 focus:ring-red-500/30 border border-[#222] rounded resize-none leading-relaxed"
               />
               <button
                 onClick={handleRecoverArchitecture}
