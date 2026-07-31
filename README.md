@@ -1,14 +1,14 @@
-# ARGUS OMEGA (V12)
+# Arg Anchor
 
 An offline-first, sovereign cybernetic runtime control center focusing on architectural alignment, static mandate linting, and reflex state reconstruction.
 
-Designed in partnership with Gemini V12 for absolute architectural integrity and operator independence.
+Designed in partnership with Gemini for absolute architectural integrity and operator independence.
 
 ---
 
 ## Technical Specifications & Architecture
 
-ARGUS OMEGA V12 is built as a highly modular, decoupled single-page cybernetic dashboard running React 18+, TypeScript, and Tailwind CSS.
+Arg Anchor is built as a highly modular, decoupled single-page cybernetic dashboard running React 18+, TypeScript, and Tailwind CSS.
 
 ### Core Components & Portability
 
@@ -68,5 +68,5 @@ CMD ["npm", "run", "start"]
 ## Contact & Sovereignty Information
 
 *   **Operator & Primary Sovereign:** [Kelsea Ziegler](mailto:kelseaziegler@gmail.com)
-*   **Co-Architect partner:** Gemini V12
+*   **Co-Architect partner:** Gemini
 *   **Status:** Architectural Core Frozen

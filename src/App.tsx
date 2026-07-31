@@ -83,7 +83,7 @@ const EXPLANATION_DATA: Record<string, {
     ]
   },
   ribbon: {
-    title: 'ARGUS OMEGA SYSTEM TELEMETRY',
+    title: 'ARG ANCHOR SYSTEM TELEMETRY',
     concept: 'Global Coherence & Real-time Sensor Array',
     laymanDescription: 'The dashboard ribbon displaying critical system-wide health and resource consumption indices, including active worker threads, systemic risk vectors, and general integrity levels.',
     technicalDetails: [
@@ -241,16 +241,16 @@ function AppContent() {
         <div className="flex items-center gap-3">
           <div className="relative flex items-center justify-center">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FFD700] to-yellow-600 flex items-center justify-center text-black font-mono font-black text-sm shadow-[0_0_15px_rgba(255,215,0,0.3)] shrink-0">
-              Ω
+              ⚓
             </div>
             <div className="absolute inset-0 rounded-lg bg-[#FFD700]/20 animate-ping" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-black font-mono tracking-wider text-white">ARGUS OMEGA</h1>
-              <span className="text-[9px] bg-[#FFD700]/10 text-[#FFD700] px-1.5 py-0.2 rounded font-mono font-bold uppercase border border-[#FFD700]/20">V12 Omega</span>
+              <h1 className="text-sm font-black font-mono tracking-wider text-white">ARG ANCHOR</h1>
+              <span className="text-[9px] bg-[#FFD700]/10 text-[#FFD700] px-1.5 py-0.2 rounded font-mono font-bold uppercase border border-[#FFD700]/20">Sovereign</span>
             </div>
-            <p className="text-[10px] font-mono text-gray-500 uppercase tracking-tight">Unified Sovereign Governance / Architect Engine</p>
+            <p className="text-[10px] font-mono text-gray-500 uppercase tracking-tight">Unified Sovereign Governance / Anchor Engine</p>
           </div>
         </div>
 
@@ -350,7 +350,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Global System Integrity Ribbon</span>
               <div className="flex items-center gap-2">
-                <p className="text-sm font-semibold text-white tracking-tight group-hover:text-[#FFD700] transition-colors uppercase">ARGUS SENTINEL FLOW</p>
+                <p className="text-sm font-semibold text-white tracking-tight group-hover:text-[#FFD700] transition-colors uppercase">ARG ANCHOR SENTINEL</p>
                 <span className={`w-1.5 h-1.5 rounded-full ${confidence < 0.5 ? 'bg-red-500 animate-pulse' : 'bg-emerald-400 animate-ping'}`} />
               </div>
             </div>
@@ -861,7 +861,7 @@ function AppContent() {
 
             <div className="border-t border-[#222] pt-4">
               <p className="text-[10px] font-mono text-gray-500 text-center">
-                ARGUS V12 OMEGA SYSTEM INTEGRITY CONTEXT PROTOCOL
+                ARG ANCHOR SOVEREIGN CONTEXT PROTOCOL
               </p>
             </div>
           </div>

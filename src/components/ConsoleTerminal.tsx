@@ -34,7 +34,7 @@ const QUICK_DIRECTIVES = [
   {
     label: 'Overview',
     icon: Cpu,
-    prompt: 'Provide a structured, technical overview of the V12 Omega Hierarchical Operating System stack.',
+    prompt: 'Provide a structured, technical overview of the Arg Anchor Sovereign system stack.',
     log: 'Executing SYSTEM_ARCHITECTURE_DIAGNOSTIC...'
   },
   {
@@ -92,7 +92,7 @@ export default function ConsoleTerminal({ onAddLog, deepFocusRef }: ConsoleTermi
             {
               id: 'boot_msg',
               role: 'system',
-              text: '🪐 [ARGUS OMEGA V12 ONLINE] - COGNITIVE MATRIX ESTABLISHED\n\n🛡️ CONSTITUTIONAL MOTTO:\n"Beyond the next level is the minimal build and quality standard for all aspects of the project."\n\nWelcome back, Principal Operator. The Frozen Core governance gates are active. All execution pipelines are verified under Layer 2 Governor oversight.\n\nType a directive below or click a Quick Macro to query the server-side Gemini architectural oracle.\n\n📝 CONSOLE COMMAND CANVAS ADVANCED CONTROLS:\n• [Enter] creates a new line exclusively (preventing accidental submissions)\n• Click [Send Icon] or press [Ctrl + Enter] / [Cmd + Enter] to execute.',
+              text: '🪐 [ARG ANCHOR SOVEREIGN CORE ONLINE] - COGNITIVE MATRIX ESTABLISHED\n\n🛡️ CONSTITUTIONAL MOTTO:\n"Beyond the next level is the minimal build and quality standard for all aspects of the project."\n\nWelcome back, Principal Operator. The Frozen Core governance gates are active. All execution pipelines are verified under Layer 2 Governor oversight.\n\nType a directive below or click a Quick Macro to query the server-side Gemini architectural oracle.\n\n📝 CONSOLE COMMAND CANVAS ADVANCED CONTROLS:\n• [Enter] creates a new line exclusively (preventing accidental submissions)\n• Click [Send Icon] or press [Ctrl + Enter] / [Cmd + Enter] to execute.',
               timestamp: new Date().toLocaleTimeString()
             }
           ]
@@ -149,13 +149,13 @@ export default function ConsoleTerminal({ onAddLog, deepFocusRef }: ConsoleTermi
     const newId = `session_${Date.now()}`;
     const newSession: SavedSession = {
       id: newId,
-      title: `ArgOS Session #${sessions.length + 1}`,
+      title: `Arg Anchor Session #${sessions.length + 1}`,
       timestamp: new Date().toLocaleString(),
       messages: [
         {
           id: `welcome_${Date.now()}`,
           role: 'system',
-          text: `🌌 [ARGUS OMEGA V12] - NEW ARCHITECTURAL CONTEXT STARTED\n\n🛡️ CONSTITUTIONAL MOTTO:\n"Beyond the next level is the minimal build and quality standard for all aspects of the project."\n\nCognitive workspace loaded successfully. Standard metadata compliance matrices are pre-configured.\n\nWhat high-performance system structure shall we draft today?`,
+          text: `🌌 [ARG ANCHOR SOVEREIGN] - NEW ARCHITECTURAL CONTEXT STARTED\n\n🛡️ CONSTITUTIONAL MOTTO:\n"Beyond the next level is the minimal build and quality standard for all aspects of the project."\n\nCognitive workspace loaded successfully. Standard metadata compliance matrices are pre-configured.\n\nWhat high-performance system structure shall we draft today?`,
           timestamp: new Date().toLocaleTimeString()
         }
       ]
@@ -390,7 +390,7 @@ export default function ConsoleTerminal({ onAddLog, deepFocusRef }: ConsoleTermi
             <Terminal className="text-[#FFD700] w-5 h-5" />
             <div>
               <h2 className="text-sm font-semibold tracking-wide text-gray-200">CORE COGNITIVE INTERFACE</h2>
-              <p className="text-[10px] font-mono text-gray-500">DIRECT CONSOLE TO ARGUS V12 PROMPT ORACLE</p>
+              <p className="text-[10px] font-mono text-gray-500">DIRECT CONSOLE TO ARG ANCHOR PROMPT ORACLE</p>
             </div>
           </div>
 

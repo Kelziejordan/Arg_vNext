@@ -1,6 +1,6 @@
 {
-  "name": "ARGUS V12 Omega",
-  "description": "The definitive interactive developer cockpit, validation engine, and AI architectural oracle for the ARGUS V12 Omega Hierarchical Operating System.",
+  "name": "Arg Anchor",
+  "description": "An offline-first, sovereign cybernetic runtime control center focusing on architectural alignment, static mandate linting, and reflex state reconstruction.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
