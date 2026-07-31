@@ -20,7 +20,9 @@ import {
   Layers,
   Shuffle,
   Shield,
-  Activity
+  Activity,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useRuntime } from '../core/RuntimeContext';
 
@@ -328,6 +330,7 @@ export default function IntentTranslator() {
 
   // Custom compiled output based on custom input
   const [compiledResult, setCompiledResult] = useState<Preset | null>(null);
+  const [showOrchestration, setShowOrchestration] = useState(false);
 
   const handlePresetSelect = (preset: Preset) => {
     setSelectedPreset(preset);
@@ -677,103 +680,124 @@ describe('${name} Core Verification', () => {
         </div>
       </div>
 
-      {/* Stage 1.5: Capability-Oriented Orchestration (Interchangeable Model Routing) */}
-      <div className="bg-[#0A0A0A] border border-[#111] rounded-lg p-5 space-y-4 relative overflow-hidden" id="capability-orchestration-panel">
+      {/* Stage 1.5: Execution Orchestration (Interchangeable Model Routing) */}
+      <div className="bg-[#0A0A0A] border border-[#111] rounded-lg p-4 relative overflow-hidden" id="execution-orchestration-panel">
         <div className="absolute top-0 right-0 w-60 h-60 bg-yellow-500/5 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#111] pb-3 gap-3">
-          <div>
-            <span className="text-[10px] font-mono text-[#FFD700] uppercase font-bold tracking-wider block">
-              Stage 1.5: Capability-Oriented Orchestration
-            </span>
-            <h3 className="text-xs font-mono font-bold text-white uppercase mt-0.5 tracking-wider flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-[#FFD700]" />
-              State-Governed Capability Router (Piece together capabilities, not identities)
-            </h3>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-yellow-500/10 text-[#FFD700] rounded">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block font-bold">
+                Stage 1.5: Execution Orchestration
+              </span>
+              <h3 className="text-xs font-mono font-bold text-white uppercase mt-0.5 tracking-wider flex items-center gap-1.5">
+                State-Governed Execution Engine (Piece together capabilities, not identities)
+              </h3>
+            </div>
           </div>
-          <span className="text-[9px] font-mono text-emerald-400 bg-emerald-950/20 border border-emerald-900/30 px-2 py-0.5 rounded font-extrabold uppercase flex items-center gap-1.5 animate-pulse">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            Unified State Core Preserved
-          </span>
+          
+          <div className="flex items-center gap-3 self-stretch md:self-auto justify-between md:justify-end">
+            <span className="text-[8.5px] font-mono text-emerald-400 bg-emerald-950/20 border border-emerald-900/30 px-2 py-0.5 rounded font-extrabold uppercase flex items-center gap-1.5 shrink-0">
+              <span className="w-1 h-1 rounded-full bg-emerald-400" />
+              Unified State Preserved
+            </span>
+            <button
+              onClick={() => {
+                setShowOrchestration(!showOrchestration);
+                addLog(showOrchestration ? 'Execution Orchestration view collapsed' : 'Opened Execution Orchestration console (under-the-hood capability router)', 'INFO', 'GOVERNOR');
+              }}
+              className="text-[9px] font-mono uppercase bg-[#141414] hover:bg-[#1a1a1a] border border-[#222] text-gray-300 hover:text-white px-2.5 py-1 rounded flex items-center gap-1.5 transition-all duration-200"
+            >
+              <span>{showOrchestration ? 'Close Hood' : 'Open Hood'}</span>
+              {showOrchestration ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         </div>
 
-        <p className="text-[11px] text-gray-400 leading-normal font-sans">
-          Instead of treating models as rigid identities (e.g. GPT, Claude, Gemini), the ARG runtime decomposes your core intent into <strong className="text-white font-mono uppercase text-[10px]">granular capability demands</strong>. Each demand is dynamically routed to the optimal interchangeable execution engine, keeping your project's governed state perfectly continuous across models and sessions.
-        </p>
+        {showOrchestration && (
+          <div className="pt-4 space-y-4 border-t border-[#111] mt-3 animate-fade-in animate-once">
+            <p className="text-[11px] text-gray-400 leading-normal font-sans">
+              Instead of treating models as rigid identities (e.g., GPT, Claude, Gemini), the ARG runtime decomposes your core intent into <strong className="text-white font-mono uppercase text-[10px]">granular capability demands</strong>. Each demand is dynamically routed to the optimal interchangeable execution engine, keeping your project's governed state perfectly continuous across models and sessions.
+            </p>
 
-        {/* Visual Columns: Decompose, Route, Reconcile */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
-          
-          {/* Decomposed Demands List (6 cols) */}
-          <div className="lg:col-span-8 space-y-2.5">
-            <div className="flex items-center gap-2 text-[9.5px] font-mono text-gray-500 uppercase border-b border-[#111] pb-1.5 font-bold">
-              <Shuffle className="w-3.5 h-3.5 text-[#FFD700]" />
-              Dynamic Capability-Demand Breakdown
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {(CAPABILITY_ORCHESTRATION_DATA[activePreset.id] || CAPABILITY_ORCHESTRATION_DATA.custom).map((item, index) => (
-                <div key={index} className="bg-[#050505] border border-[#222] p-3 rounded flex flex-col justify-between hover:border-amber-500/40 transition-all duration-300 group">
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-start gap-1">
-                      <span className="text-[9px] font-mono font-bold text-[#FFD700] uppercase tracking-tight leading-tight block truncate">
-                        {item.capability}
-                      </span>
-                      <span className="text-[7.5px] bg-white/10 text-white border border-white/20 px-1 py-0.2 rounded font-mono uppercase font-bold shrink-0">
-                        P{index + 1}
-                      </span>
+            {/* Visual Columns: Decompose, Route, Reconcile */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-1">
+              
+              {/* Decomposed Demands List (8 cols) */}
+              <div className="lg:col-span-8 space-y-2.5">
+                <div className="flex items-center gap-2 text-[9px] font-mono text-gray-500 uppercase border-b border-[#111] pb-1.5 font-bold">
+                  <Shuffle className="w-3.5 h-3.5 text-[#FFD700]" />
+                  Dynamic Capability-Demand Breakdown
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {(CAPABILITY_ORCHESTRATION_DATA[activePreset.id] || CAPABILITY_ORCHESTRATION_DATA.custom).map((item, index) => (
+                    <div key={index} className="bg-[#050505] border border-[#222] p-3 rounded flex flex-col justify-between hover:border-amber-500/40 transition-all duration-300 group">
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-start gap-1">
+                          <span className="text-[8.5px] font-mono font-bold text-[#FFD700] uppercase tracking-tight leading-tight block truncate">
+                            {item.capability}
+                          </span>
+                          <span className="text-[7px] bg-white/10 text-white border border-white/20 px-1 py-0.2 rounded font-mono uppercase font-bold shrink-0">
+                            P{index + 1}
+                          </span>
+                        </div>
+                        <p className="text-[9.5px] text-gray-400 font-mono leading-tight">
+                          {item.demand}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#111] pt-2 mt-2 space-y-1">
+                        <div className="flex items-center justify-between text-[7px] font-mono text-gray-500 uppercase">
+                          <span>Mapped Engine</span>
+                          <span className="text-emerald-400 font-bold">{item.badge}</span>
+                        </div>
+                        <div className="text-[8px] font-mono text-gray-300 truncate font-semibold block uppercase">
+                          {item.engine}
+                        </div>
+                        <div className="text-[7.5px] font-mono text-gray-600 block truncate">
+                          {item.tier}
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-[9.5px] text-gray-400 font-mono leading-tight">
-                      {item.demand}
+                  ))}
+                </div>
+              </div>
+
+              {/* Core State Reconciliation Panel (4 cols) */}
+              <div className="lg:col-span-4 bg-[#050505] border border-[#222] p-4 rounded flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-1.5 text-[9px] font-mono text-gray-500 uppercase border-b border-[#111] pb-1.5 font-bold">
+                    <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                    Governed State Core
+                  </div>
+
+                  <div className="bg-[#0C0C0C] p-3 rounded border border-emerald-950/40 space-y-1.5">
+                    <div className="flex justify-between items-center text-[9px] font-mono text-emerald-400 font-bold">
+                      <span>UNIFIED PROJECT MEMORY</span>
+                      <span className="text-[8px] bg-emerald-950/40 text-emerald-400 border border-emerald-900/40 px-1 rounded uppercase font-bold">ACTIVE</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 leading-normal font-sans">
+                      The active runtime preserves every decision, entity rule, and constraint as structured state memory. Session limits or switching models will never lose context.
                     </p>
                   </div>
+                </div>
 
-                  <div className="border-t border-[#111] pt-2 mt-2 space-y-1">
-                    <div className="flex items-center justify-between text-[7px] font-mono text-gray-500 uppercase">
-                      <span>Mapped Engine</span>
-                      <span className="text-emerald-400 font-bold">{item.badge}</span>
-                    </div>
-                    <div className="text-[8.5px] font-mono text-gray-300 truncate font-semibold block uppercase">
-                      {item.engine}
-                    </div>
-                    <div className="text-[7.5px] font-mono text-gray-600 block truncate">
-                      {item.tier}
-                    </div>
+                <div className="border-t border-[#111] pt-3 mt-3 flex items-center justify-between text-[8px] font-mono text-gray-500">
+                  <div className="flex items-center gap-1.5">
+                    <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
+                    <span>RECONCILIATOR: NOMINAL</span>
                   </div>
+                  <span className="text-gray-600 uppercase">SYNC RATE: 100%</span>
                 </div>
-              ))}
+              </div>
+
             </div>
           </div>
-
-          {/* Core State Reconciliation Panel (4 cols) */}
-          <div className="lg:col-span-4 bg-[#050505] border border-[#222] p-4 rounded flex flex-col justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-1.5 text-[9.5px] font-mono text-gray-500 uppercase border-b border-[#111] pb-1.5 font-bold">
-                <Shield className="w-3.5 h-3.5 text-emerald-400" />
-                Governed State Core
-              </div>
-
-              <div className="bg-[#0C0C0C] p-3 rounded border border-emerald-950/40 space-y-1.5">
-                <div className="flex justify-between items-center text-[9px] font-mono text-emerald-400 font-bold">
-                  <span>UNIFIED PROJECT MEMORY</span>
-                  <span className="text-[8px] bg-emerald-950/40 text-emerald-400 border border-emerald-900/40 px-1 rounded uppercase font-bold">ACTIVE</span>
-                </div>
-                <p className="text-[10px] text-gray-400 leading-normal font-sans">
-                  The active runtime preserves every decision, entity rule, and constraint as structured state memory. Session limits or switching models will never lose context.
-                </p>
-              </div>
-            </div>
-
-            <div className="border-t border-[#111] pt-3 mt-3 flex items-center justify-between text-[8px] font-mono text-gray-500">
-              <div className="flex items-center gap-1.5">
-                <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
-                <span>RECONCILIATOR: NOMINAL</span>
-              </div>
-              <span className="text-gray-600 uppercase">SYNC RATE: 100%</span>
-            </div>
-          </div>
-
-        </div>
+        )}
       </div>
 
       {/* Bottom Interface: Target Projection Panel (Any Output) */}
