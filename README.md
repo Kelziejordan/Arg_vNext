@@ -55,13 +55,21 @@ CMD ["npm", "run", "start"]
 
 ---
 
-## Identity Knobs & Pillars
+## Identity Knobs & Core Pillars
 
-1.  **Operational State Service (Pillar 1):** Identity vectors adjustments (Aggression Stance, Caution Guardrails, Exploration Rate) plotted on an Autonomic Balance Vector Map.
-2.  **Knowledge Objects Service (Pillar 2):** Read-only, immutable structures representing protocols and knowledge states.
-3.  **Policy & Constitutional Governance (Pillar 3):** Safeguards, intent arbitration conflict simulator, and the 4 organism layers (Adaptive Autonomy, Cognitive Cache, Micro-Intent Engine, Self-Healing Runtime).
-4.  **Capability Registry Service (Pillar 4):** A real-time, event-sourced list of pipelines, execution threads, and operational metrics.
-5.  **Restoration & Reflex Reconstruction (Pillar 5):** Unified disaster recovery consoles, end-of-session State Refresh controls, and append-only continuity snapshot logs.
+The Arg Anchor environment consists of a dual-layered pipeline: an **Intent Processing Pipeline** and **Five Autonomic Subsystem Pillars**.
+
+### The Intent Processing Pipeline
+1.  **Intent Translation (Stage 1.0):** Compiles raw operator intents into structured, canonical specifications, complete with schema adjustments, database tables, and validation models.
+2.  **Execution Orchestration (Stage 1.5):** Decomposes specifications into granular capability demands and routes them dynamically across interchangeable execution engines (GPT, Claude, Gemini-tier models) while preserving a single, unified, sovereign state core.
+3.  **Target Projection (Stage 2.0):** Employs safe, isolated, and dry-run code-generation pipelines to project final React TSX components, configurations, and specs.
+
+### The Five Autonomic Subsystem Pillars
+1.  **Operational State Service (Pillar 1):** Real-time identity vectors adjustments (Aggression Stance, Caution Guardrails, Exploration Rate) plotted on an Autonomic Balance Vector Map.
+2.  **Knowledge Objects Service (Pillar 2):** Read-only, immutable schemas and catalog matrices representing protocols, directories, and knowledge states.
+3.  **Policy & Constitutional Governance (Pillar 3):** Safeguards, intent arbitration conflict simulator, and the four organism layers (Adaptive Autonomy, Cognitive Cache, Micro-Intent Engine, Self-Healing Runtime).
+4.  **Capability Registry Service (Pillar 4):** A real-time, event-sourced registry of pipelines, active processing threads, and system operational metrics.
+5.  **Restoration & Reflex Reconstruction (Pillar 5):** Disaster recovery console, end-of-session State Refresh controls, and append-only continuity snapshot logs.
 
 ---
 
