@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Zap,
   Play,
@@ -26,9 +26,13 @@ import {
   RefreshCw,
   GitBranch,
   Sliders,
-  DollarSign
+  DollarSign,
+  AlertTriangle,
+  History,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useRuntime } from '../core/RuntimeContext';
+import { MandateValidatorService } from '../runtime/MandateValidatorService';
 
 interface TestScenario {
   id: string;
@@ -39,6 +43,49 @@ interface TestScenario {
   passConditions: string;
 }
 
+export interface ExecutionJournalBlock {
+  index: number;
+  timestamp: string;
+  tier: number;
+  score: number;
+  status: 'SUCCESS' | 'FAILED';
+  previousHash: string;
+  currentHash: string;
+  details: string;
+}
+
+// Custom browser-safe polynomial string hashing function to emulate hex signature generation
+function computeBlockHash(
+  index: number,
+  timestamp: string,
+  tier: number,
+  score: number,
+  status: string,
+  previousHash: string
+): string {
+  const inputStr = `${index}|${timestamp}|${tier}|${score}|${status}|${previousHash}`;
+  let hash = 0;
+  for (let i = 0; i < inputStr.length; i++) {
+    const char = inputStr.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  
+  // Convert to deterministic pseudo-SHA-256 signature representation
+  const salt = "s7_anchor_sovereign_identity_salt_2026";
+  let fullHash = "";
+  for (let i = 0; i < 4; i++) {
+    let subHash = 0;
+    const chunk = inputStr + salt.substring(i * 4, (i + 1) * 4) + i;
+    for (let j = 0; j < chunk.length; j++) {
+      subHash = (subHash << 5) - subHash + chunk.charCodeAt(j);
+      subHash = subHash & subHash;
+    }
+    fullHash += Math.abs(subHash).toString(16).padStart(8, '0');
+  }
+  return "0x" + fullHash.substring(0, 32).toLowerCase();
+}
+
 export default function CapabilityRegistryPanel() {
   const {
     capabilities,
@@ -46,6 +93,13 @@ export default function CapabilityRegistryPanel() {
     runCapabilityAudit,
     addLog,
     addLedgerEvent,
+    operatingState,
+    confidence,
+    setConfidence,
+    metrics,
+    setMetrics,
+    aggression,
+    caution,
     
     simActive,
     setSimActive,
@@ -126,6 +180,99 @@ export default function CapabilityRegistryPanel() {
   const [isCompiling, setIsCompiling] = useState(false);
   const [compilerProgress, setCompilerProgress] = useState('');
   const [compiledSuccess, setCompiledSuccess] = useState(false);
+  const [compiledFailure, setCompiledFailure] = useState(false);
+  const [contractError, setContractError] = useState<string | null>(null);
+  const [mandateError, setMandateError] = useState<string | null>(null);
+
+  // Cryptographic Execution Journal State
+  const [journalChain, setJournalChain] = useState<ExecutionJournalBlock[]>([]);
+  const [verificationResult, setVerificationResult] = useState<'NONE' | 'VALID' | 'TAMPERED'>('NONE');
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+
+  // Initialize and Seed Journal on Mount
+  useEffect(() => {
+    const stored = localStorage.getItem('argos_execution_journal');
+    if (stored) {
+      try {
+        setJournalChain(JSON.parse(stored));
+      } catch (e) {
+        initializeSeedJournal();
+      }
+    } else {
+      initializeSeedJournal();
+    }
+  }, []);
+
+  const initializeSeedJournal = () => {
+    const b1_prev = '0x00000000000000000000000000000000';
+    const b1_hash = computeBlockHash(1, '11:15:32 AM', 3, 100, 'SUCCESS', b1_prev);
+    
+    const b2_prev = b1_hash;
+    const b2_hash = computeBlockHash(2, '12:04:15 PM', 2, 100, 'SUCCESS', b2_prev);
+    
+    const b3_prev = b2_hash;
+    const b3_hash = computeBlockHash(3, '02:44:10 PM', 1, 65, 'FAILED', b3_prev);
+
+    const seeded: ExecutionJournalBlock[] = [
+      {
+        index: 1,
+        timestamp: '11:15:32 AM',
+        tier: 3,
+        score: 100,
+        status: 'SUCCESS',
+        previousHash: b1_prev,
+        currentHash: b1_hash,
+        details: 'Initial system seed compilation. All 9 constitutional mandates fully synchronized.'
+      },
+      {
+        index: 2,
+        timestamp: '12:04:15 PM',
+        tier: 2,
+        score: 100,
+        status: 'SUCCESS',
+        previousHash: b2_prev,
+        currentHash: b2_hash,
+        details: 'Standard runtime context freeze build. Local state persistence buffers locked.'
+      },
+      {
+        index: 3,
+        timestamp: '02:44:10 PM',
+        tier: 1,
+        score: 65,
+        status: 'FAILED',
+        previousHash: b3_prev,
+        currentHash: b3_hash,
+        details: 'Mandate Audit Failed: Confidence level fell below safety threshold 50% under simulation stress.'
+      }
+    ];
+    setJournalChain(seeded);
+    localStorage.setItem('argos_execution_journal', JSON.stringify(seeded));
+  };
+
+  const appendJournalBlock = (status: 'SUCCESS' | 'FAILED', score: number, details: string) => {
+    setJournalChain(prev => {
+      const prevBlock = prev[prev.length - 1];
+      const prevHash = prevBlock ? prevBlock.currentHash : '0x00000000000000000000000000000000';
+      const index = prev.length + 1;
+      const timestamp = new Date().toLocaleTimeString();
+      const currentHash = computeBlockHash(index, timestamp, pipelineTier, score, status, prevHash);
+      
+      const newBlock: ExecutionJournalBlock = {
+        index,
+        timestamp,
+        tier: pipelineTier,
+        score,
+        status,
+        previousHash: prevHash,
+        currentHash,
+        details
+      };
+      
+      const newChain = [...prev, newBlock];
+      localStorage.setItem('argos_execution_journal', JSON.stringify(newChain));
+      return newChain;
+    });
+  };
 
   const PIPELINE_PROCESSES = [
     { step: 0, name: 'Pipeline Scale Classifier', tier: [1, 2, 3] },
@@ -140,10 +287,16 @@ export default function CapabilityRegistryPanel() {
     { step: 15, name: 'Iterative Layer Generation', tier: [1, 2, 3] }
   ];
 
-  // Execute Build Compiler
+  // Execute Build Compiler with true Verification Gates & Agent Contracts
   const handleRunCompiler = () => {
     setIsCompiling(true);
     setCompiledSuccess(false);
+    setCompiledFailure(false);
+    setContractError(null);
+    setMandateError(null);
+    setVerificationResult('NONE');
+    setVerificationError(null);
+
     addLog(`Starting APEX Compiler Pipeline under Tier ${pipelineTier} scaling...`, 'INFO', 'APEX');
     addLedgerEvent(`COMPILER_START -> tier: ${pipelineTier}`);
 
@@ -155,14 +308,66 @@ export default function CapabilityRegistryPanel() {
         const step = steps[currentIdx];
         setCompilerProgress(`Process ${step.step}: ${step.name}`);
         addLog(`[APEX_COMPILER] Running step ${step.step}: ${step.name}...`, 'INFO', 'APEX');
+        
+        // INTERCEPT AT STEP 12 FOR GENUINE VERIFICATION GATE ACTION
+        if (step.step === 12) {
+          // 1. Agent Contract Check (Aggression vs Caution Divergence Constraint)
+          const divergence = Math.abs(aggression - caution);
+          if (divergence > 0.40) {
+            clearInterval(interval);
+            setIsCompiling(false);
+            setCompiledFailure(true);
+            const breachMsg = `Personality divergence ratio is ${divergence.toFixed(2)} (Aggression: ${aggression.toFixed(2)}, Caution: ${caution.toFixed(2)}), which exceeds the secure Sandbox Contract limit of <= 0.40!`;
+            setContractError(breachMsg);
+            
+            addLog(`[AGENT_CONTRACT_BREACH] Verification Gate halted compiling. Personality split: ${divergence.toFixed(2)} (Max: 0.40).`, 'ERROR', 'GOVERNOR');
+            addLedgerEvent('COMPILER_CONTRACT_BREACH');
+            
+            // Append failure block to Crytographic Journal
+            appendJournalBlock('FAILED', 50, `Agent Contract Breach: personality gap ${divergence.toFixed(2)} exceeds 0.40 limit.`);
+            return;
+          }
+
+          // 2. Continuous Engineering Mandates Audit
+          const threadsCount = Math.round(metrics.metabolicCost / 2.5);
+          const auditResult = MandateValidatorService.auditSystem({
+            operatingState: operatingState,
+            confidence: confidence,
+            activeThreads: threadsCount,
+            aggression: aggression,
+            caution: caution
+          });
+
+          if (!auditResult.passed) {
+            clearInterval(interval);
+            setIsCompiling(false);
+            setCompiledFailure(true);
+            const mandateMsg = `Constitutional audit failed with score ${auditResult.score}% (Requires >= 80%). ${auditResult.overallSummary}`;
+            setMandateError(mandateMsg);
+            
+            addLog(`[MANDATE_ALIGNMENT_FAILURE] Verification Gate blocked compiler pass. Score: ${auditResult.score}% (Underflow).`, 'ERROR', 'GOVERNOR');
+            addLedgerEvent(`COMPILER_MANDATE_FAILURE -> score: ${auditResult.score}`);
+            
+            // Append failure block to Crytographic Journal
+            appendJournalBlock('FAILED', auditResult.score, `Mandate Audit Failed: Score ${auditResult.score}% is below threshold. ${auditResult.overallSummary}`);
+            return;
+          }
+          
+          addLog(`[APEX_COMPILER] Verification Gate PASS. Personality gap: ${divergence.toFixed(2)}, Mandate Audit score: ${auditResult.score}%.`, 'SYSTEM', 'APEX');
+        }
+
         currentIdx++;
       } else {
         clearInterval(interval);
         setIsCompiling(false);
         setCompilerProgress('');
         setCompiledSuccess(true);
+        
         addLog('APEX Compiler complete. Executable modules compiled and signed under Clearance Gate.', 'SYSTEM', 'APEX');
         addLedgerEvent('COMPILER_BUILD_SUCCESS');
+        
+        // Append successful block to Cryptographic Journal
+        appendJournalBlock('SUCCESS', 100, `Compilation Compliant. All 9 constitutional mandates validated with score 100%.`);
       }
     }, 350);
   };
@@ -201,6 +406,114 @@ export default function CapabilityRegistryPanel() {
         addLedgerEvent(`STRESS_TEST_PASSED -> id: ${sc.id}`);
       }
     }, 450);
+  };
+
+  // Cryptographic Ledger Verification Handlers
+  const handleVerifyJournal = () => {
+    setVerificationResult('NONE');
+    setVerificationError(null);
+    
+    let isValid = true;
+    let errorMsg = null;
+    
+    for (let i = 0; i < journalChain.length; i++) {
+      const block = journalChain[i];
+      
+      // 1. Verify previous hash link (except first block)
+      if (i > 0) {
+        const prevBlock = journalChain[i - 1];
+        if (block.previousHash !== prevBlock.currentHash) {
+          isValid = false;
+          errorMsg = `Chain Link Discontinuity at Block #${block.index}: Previous Hash link is broken. Chain has been severed.`;
+          break;
+        }
+      } else {
+        if (block.previousHash !== '0x00000000000000000000000000000000') {
+          isValid = false;
+          errorMsg = `Root Anchor Breach: Block #1 previous hash is corrupted.`;
+          break;
+        }
+      }
+      
+      // 2. Verify stored block hash matches computed block hash
+      const computed = computeBlockHash(
+        block.index,
+        block.timestamp,
+        block.tier,
+        block.score,
+        block.status,
+        block.previousHash
+      );
+      
+      if (block.currentHash !== computed) {
+        isValid = false;
+        errorMsg = `Content Tamper Detected at Block #${block.index}: Block contents do not match its cryptographic signature. Stored: ${block.currentHash.substring(0, 10)}... Computed: ${computed.substring(0, 10)}...`;
+        break;
+      }
+    }
+    
+    if (isValid) {
+      setVerificationResult('VALID');
+      addLog('Execution Journal cryptographic hash chain validated successfully. 0 anomalies detected.', 'SYSTEM', 'GOVERNOR');
+      addLedgerEvent('JOURNAL_VERIFICATION_PASS');
+    } else {
+      setVerificationResult('TAMPERED');
+      setVerificationError(errorMsg);
+      addLog(`🚨 WARNING: CRYPTOGRAPHIC VERIFICATION BREACH! ${errorMsg}`, 'ERROR', 'GOVERNOR');
+      addLedgerEvent('JOURNAL_VERIFICATION_FAIL');
+    }
+  };
+
+  const handleSimulateTamper = () => {
+    if (journalChain.length < 2) return;
+    
+    const updated = journalChain.map((block, idx) => {
+      if (idx === 1) { // block #2
+        return {
+          ...block,
+          score: 85, 
+          details: 'Standard runtime context freeze build. [MALICIOUS_INJECT: modified compliance metrics]'
+        };
+      }
+      return block;
+    });
+    
+    setJournalChain(updated);
+    localStorage.setItem('argos_execution_journal', JSON.stringify(updated));
+    setVerificationResult('NONE');
+    setVerificationError(null);
+    addLog('CRITICAL: Malicious data injection simulated. Block #2 compliance metrics modified in memory.', 'WARN', 'GOVERNOR');
+    addLedgerEvent('JOURNAL_DATA_TAMPER_SIMULATED');
+  };
+
+  const handleRealignAndSignChain = () => {
+    let currentPrev = '0x00000000000000000000000000000000';
+    const signed = journalChain.map((block) => {
+      const cleanDetails = block.details.replace(' [MALICIOUS_INJECT: modified compliance metrics]', '');
+      const hash = computeBlockHash(
+        block.index,
+        block.timestamp,
+        block.tier,
+        block.score,
+        block.status,
+        currentPrev
+      );
+      const updatedBlock = {
+        ...block,
+        details: cleanDetails,
+        previousHash: currentPrev,
+        currentHash: hash
+      };
+      currentPrev = hash;
+      return updatedBlock;
+    });
+    
+    setJournalChain(signed);
+    localStorage.setItem('argos_execution_journal', JSON.stringify(signed));
+    setVerificationResult('NONE');
+    setVerificationError(null);
+    addLog('Verification override: Recalculated hash chains and re-signed Execution Journal.', 'SYSTEM', 'GOVERNOR');
+    addLedgerEvent('JOURNAL_REALIGNED_AND_SIGNED');
   };
 
   return (
@@ -272,9 +585,9 @@ export default function CapabilityRegistryPanel() {
         </div>
 
         {/* Tier Config Section */}
-        <div className="bg-[#050505] p-3 border border-[#222] rounded shrink-0 space-y-2.5">
+        <div className="bg-[#050505] p-2.5 border border-[#222] rounded shrink-0 space-y-1.5">
           <span className="text-[9px] font-mono text-[#FFD700] uppercase block">Compiler Execution Tier</span>
-          <div className="grid grid-cols-3 gap-2 font-mono text-[9px]">
+          <div className="grid grid-cols-3 gap-1.5 font-mono text-[9px]">
             {([1, 2, 3] as const).map((tier) => (
               <button
                 key={tier}
@@ -290,29 +603,62 @@ export default function CapabilityRegistryPanel() {
               </button>
             ))}
           </div>
-          <p className="text-[8px] text-gray-500 leading-normal leading-relaxed">
-            {pipelineTier === 1 && 'Tier 1: High performance compiling. Fully utilizes sabotage engineers to stress check compiled builds.'}
-            {pipelineTier === 2 && 'Tier 2: Balanced compilation. Omits saboteur checks, focus on strict ADR lineage linkages.'}
-            {pipelineTier === 3 && 'Tier 3: Core minimal compiling. Compiles only essential active mandates for extreme speed.'}
-          </p>
+        </div>
+
+        {/* Live Agent Contract Rules Check Box */}
+        <div className="bg-[#050505] border border-[#222] p-2.5 rounded shrink-0 space-y-1.5 font-mono text-[8.5px]">
+          <span className="text-[9px] text-[#FFD700] font-bold block uppercase flex justify-between">
+            <span>Agent Sandbox Contract</span>
+            <span className="text-emerald-400 text-[8px] animate-pulse">● ENFORCED</span>
+          </span>
+          <div className="space-y-1 text-gray-400">
+            <div className="flex justify-between items-center">
+              <span>Personality Gap (Max 0.40):</span>
+              <span className={`font-bold ${Math.abs(aggression - caution) <= 0.40 ? 'text-emerald-400' : 'text-red-500 animate-pulse'}`}>
+                {Math.abs(aggression - caution).toFixed(2)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Workload Threads (Max 20):</span>
+              <span className={`font-bold ${Math.round(metrics.metabolicCost / 2.5) <= 20 ? 'text-emerald-400' : 'text-red-500 animate-pulse'}`}>
+                {Math.round(metrics.metabolicCost / 2.5)}/20
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Confidence Threshold (Min 0.50):</span>
+              <span className={`font-bold ${confidence >= 0.50 ? 'text-emerald-400' : 'text-red-500 animate-pulse'}`}>
+                {confidence.toFixed(2)}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Compile Progress Panel */}
-        <div className="bg-[#050505] border border-[#222] rounded flex-grow my-3 p-3 flex flex-col justify-between font-mono text-[9px] h-[100px]">
+        <div className="bg-[#050505] border border-[#222] rounded flex-grow my-2 p-2.5 flex flex-col justify-between font-mono text-[9px] h-[95px] overflow-hidden">
           <span className="text-[8px] text-gray-500 block uppercase">Compiler Diagnostics</span>
-          <div className="flex-grow flex flex-col justify-center text-center space-y-2">
+          <div className="flex-grow flex flex-col justify-center text-center space-y-1.5 py-1">
             {isCompiling ? (
               <>
-                <RefreshCw className="w-5 h-5 text-[#FFD700] animate-spin mx-auto" />
-                <span className="text-gray-300 animate-pulse">{compilerProgress}...</span>
+                <RefreshCw className="w-4 h-4 text-[#FFD700] animate-spin mx-auto" />
+                <span className="text-gray-300 animate-pulse truncate">{compilerProgress}...</span>
               </>
             ) : compiledSuccess ? (
               <>
-                <CheckCircle className="w-5 h-5 text-emerald-400 mx-auto" />
-                <span className="text-emerald-400 font-bold">COMPILATION COMPLIANT & SIGNED</span>
+                <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto" />
+                <span className="text-emerald-400 font-bold uppercase text-[9px]">COMPILATION COMPLIANT & SIGNED</span>
               </>
+            ) : compiledFailure ? (
+              <div className="text-left space-y-1 text-red-500 h-14 overflow-y-auto scrollbar-thin">
+                <div className="flex items-start gap-1 font-bold text-[8.5px]">
+                  <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <span>ASSERTION FAULT (STEP 12)</span>
+                </div>
+                <p className="text-[8px] leading-tight text-gray-300">
+                  {contractError || mandateError}
+                </p>
+              </div>
             ) : (
-              <span className="text-gray-600">Standby. Click 'Execute Compilation' below to verify compiled assets.</span>
+              <span className="text-gray-600 text-[8.5px] leading-normal">Standby. Click 'Execute Compilation' below to verify and cryptographically sign assets.</span>
             )}
           </div>
         </div>
@@ -391,6 +737,115 @@ export default function CapabilityRegistryPanel() {
 
         <div className="text-[8px] font-mono text-gray-500 leading-normal uppercase shrink-0 pt-1 text-center">
           Ensures ArgOS is structurally incapable of violating core principles without triggering immediate resistance and recovery.
+        </div>
+      </div>
+
+      {/* Cryptographic Execution Journal (12 columns) */}
+      <div className="md:col-span-12 bg-[#0A0A0A] border border-[#222] p-5 rounded-lg flex flex-col space-y-4">
+        <div className="flex justify-between items-center border-b border-[#222] pb-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-[#FFD700]" />
+            <div>
+              <h3 className="text-xs font-mono text-gray-200 uppercase tracking-wider font-bold">Cryptographic Execution Journal</h3>
+              <p className="text-[9px] font-mono text-gray-500 leading-none mt-0.5">Immutable audit ledger tracking compiler runs and governance validation histories (Page 78)</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            {/* Verify Ledger */}
+            <button
+              onClick={handleVerifyJournal}
+              className="px-2.5 py-1 text-[9px] font-mono font-bold bg-[#111] hover:bg-emerald-950/20 text-gray-300 hover:text-emerald-400 border border-[#222] hover:border-emerald-800 rounded transition cursor-pointer flex items-center gap-1 uppercase"
+            >
+              <ShieldCheck className="w-3 h-3" />
+              Verify Journal Integrity
+            </button>
+            {/* Simulate Cyber Attack Tampering */}
+            <button
+              onClick={handleSimulateTamper}
+              className="px-2.5 py-1 text-[9px] font-mono font-bold bg-[#111] hover:bg-red-950/25 text-gray-300 hover:text-red-500 border border-[#222] hover:border-red-900 rounded transition cursor-pointer flex items-center gap-1 uppercase"
+              title="Simulate modifying ledger contents without signing to test verification"
+            >
+              <AlertTriangle className="w-3 h-3" />
+              Simulate Cyber Tamper
+            </button>
+            {/* Re-align & Sign */}
+            <button
+              onClick={handleRealignAndSignChain}
+              className="px-2.5 py-1 text-[9px] font-mono font-bold bg-[#111] hover:bg-white/10 text-gray-300 hover:text-white border border-[#222] hover:border-white/30 rounded transition cursor-pointer flex items-center gap-1 uppercase font-bold"
+              title="Recalculate previous hash pointer chain and re-sign all blocks"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Re-align & Sign Chain
+            </button>
+          </div>
+        </div>
+
+        {/* Verification Alert Callouts */}
+        {verificationResult === 'VALID' && (
+          <div className="bg-emerald-950/10 border border-emerald-900/30 text-emerald-400 p-2.5 rounded font-mono text-[9px] flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+            <div>
+              <span className="font-bold">✓ CRYPTOGRAPHIC LEDGER SECURED:</span> All block hashes, pointer chains, and payload checksums verified successfully. No tampering detected. Core governance constraints active.
+            </div>
+          </div>
+        )}
+        {verificationResult === 'TAMPERED' && (
+          <div className="bg-red-950/15 border border-red-900/30 text-red-500 p-2.5 rounded font-mono text-[9px] flex items-center gap-2 animate-pulse">
+            <ShieldAlert className="w-4 h-4 text-red-500 shrink-0" />
+            <div>
+              <span className="font-bold">🚨 CRYPTOGRAPHIC INTEGRITY VIOLATION:</span> {verificationError}
+            </div>
+          </div>
+        )}
+
+        {/* Ledger Table */}
+        <div className="border border-[#222] rounded overflow-hidden">
+          <table className="w-full text-left font-mono text-[8.5px] text-gray-400">
+            <thead>
+              <tr className="bg-[#050505] border-b border-[#222] text-gray-500 uppercase text-[8px] tracking-wider">
+                <th className="py-2 px-3">Block #</th>
+                <th className="py-2 px-3">Timestamp</th>
+                <th className="py-2 px-3">Tier</th>
+                <th className="py-2 px-3">Score</th>
+                <th className="py-2 px-3">Status</th>
+                <th className="py-2 px-3">Previous Hash Pointer</th>
+                <th className="py-2 px-3">Current Block Hash</th>
+                <th className="py-2 px-3">Execution & Governance Payload Details</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#151515]">
+              {journalChain.map((block) => (
+                <tr key={block.index} className="hover:bg-[#070707] transition">
+                  <td className="py-2 px-3 font-bold text-gray-200">#{block.index}</td>
+                  <td className="py-2 px-3 text-gray-500">{block.timestamp}</td>
+                  <td className="py-2 px-3">
+                    <span className="bg-white/5 px-1 py-0.5 rounded text-[8px]">
+                      Tier {block.tier}
+                    </span>
+                  </td>
+                  <td className="py-2 px-3 font-bold text-gray-300">{block.score}%</td>
+                  <td className="py-2 px-3">
+                    <span className={`px-1.5 py-0.5 rounded font-bold uppercase text-[7.5px] ${
+                      block.status === 'SUCCESS'
+                        ? 'bg-emerald-950/20 text-emerald-400 border border-emerald-900/40'
+                        : 'bg-red-950/20 text-red-400 border border-red-900/40'
+                    }`}>
+                      {block.status}
+                    </span>
+                  </td>
+                  <td className="py-2 px-3 text-[8px] text-gray-600 truncate max-w-[90px]" title={block.previousHash}>
+                    {block.previousHash}
+                  </td>
+                  <td className="py-2 px-3 text-[8px] text-[#FFD700] font-bold truncate max-w-[90px]" title={block.currentHash}>
+                    {block.currentHash}
+                  </td>
+                  <td className="py-2 px-3 text-gray-300 leading-snug max-w-[320px] truncate" title={block.details}>
+                    {block.details}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

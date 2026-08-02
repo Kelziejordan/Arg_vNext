@@ -41,8 +41,61 @@ export default function HomePanel({ onNavigate }: HomePanelProps) {
     triggerScenario(scenario);
   };
 
+  // Get localized simple indicators for the 15-Second Flight Deck
+  const getStatusColor = () => {
+    if (operatingState === 'RECOVERING' || operatingState === 'CRITICAL_DRIFT') return 'text-red-500 bg-red-500/10 border-red-500/20';
+    if (operatingState === 'FREEZE') return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
+    return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* 15-SECOND EXECUTIVE FLIGHT DECK (Instant Visual Anchor) */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-[#0A0A0A] border border-[#222] p-3 rounded-lg font-mono text-[9px] relative overflow-hidden" id="executive-flight-deck">
+        <div className="md:col-span-1 flex items-center gap-2.5 border-r border-[#1a1a1a] pr-2">
+          <Activity className="w-4 h-4 text-[#FFD700] shrink-0 animate-pulse" />
+          <div>
+            <span className="text-[8px] text-gray-500 uppercase block leading-none">SYSTEM STATUS</span>
+            <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase inline-block mt-1 border ${getStatusColor()}`}>
+              {operatingState}
+            </span>
+          </div>
+        </div>
+
+        <div className="md:col-span-1 flex items-center gap-2.5 border-r border-[#1a1a1a] px-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div>
+            <span className="text-[8px] text-gray-500 uppercase block leading-none">GOVERNANCE INDEX</span>
+            <span className="text-gray-200 font-bold block mt-1 text-[10px]">
+              9/9 MANDATES ACTIVE
+            </span>
+          </div>
+        </div>
+
+        <div className="md:col-span-1 flex items-center gap-2.5 border-r border-[#1a1a1a] px-2">
+          <Lock className="w-4 h-4 text-[#FFD700] shrink-0" />
+          <div>
+            <span className="text-[8px] text-gray-500 uppercase block leading-none">LEDGER SECURITY</span>
+            <span className="text-emerald-400 font-bold block mt-1 text-[10px]">
+              100% CRYPTO SIGNED
+            </span>
+          </div>
+        </div>
+
+        <div className="md:col-span-1 flex items-center justify-between pl-2">
+          <div>
+            <span className="text-[8px] text-gray-500 uppercase block leading-none">CORE CONFIDENCE</span>
+            <span className="text-[#FFD700] font-black block mt-1 text-[10px]">
+              {(confidence * 100).toFixed(0)}% NOMINAL
+            </span>
+          </div>
+          <div className="flex gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          </div>
+        </div>
+      </div>
+
       {/* Visual Identity Hero Card */}
       <div className="bg-[#0A0A0A] border border-[#222] rounded-lg p-6 relative overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#FFD700]/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />

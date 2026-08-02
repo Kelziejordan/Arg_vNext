@@ -184,6 +184,20 @@ Return a highly structured response of the audit.`;
   }
 });
 
+// 3. API Route: Real-Time Server Telemetry
+app.get("/api/telemetry", (req, res) => {
+  res.json({
+    heapUsed: process.memoryUsage().heapUsed,
+    heapTotal: process.memoryUsage().heapTotal,
+    rss: process.memoryUsage().rss,
+    uptime: process.uptime(),
+    hasApiKey: !!process.env.GEMINI_API_KEY,
+    nodeVersion: process.version,
+    platform: process.platform,
+    timestamp: Date.now()
+  });
+});
+
 // Serve frontend assets
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

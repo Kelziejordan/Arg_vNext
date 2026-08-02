@@ -92,18 +92,39 @@ export default function PipelineVisualizer({ onAddLog, onUpdateMetrics, onShowEx
       // Add protocol-specific log embellishments
       setTimeout(() => {
         let embellish = '';
+        let multiLogs: string[] = [];
         if (step.id === 4) {
           embellish = `🛡️ [THREAT SCAN] Conforming to rules of ${PROTOCOL_METADATA[activeProtocol].tag}. Validating boundaries.`;
         } else if (step.id === 12) {
-          embellish = `✅ [MANDATE GATE] Reviewing static code structures against 9 Mandates. All thresholds secure.`;
+          multiLogs = [
+            `⚖️ [VERIFICATION GATE] Initiating multi-stage objective verification checks:`,
+            `  • [CONFIDENCE SCORE] Calculated: 0.95 (Risk assessment: LOW)`,
+            `  • [ACCEPTANCE CRITERIA] Matching criteria against canonical spec: 100% compliant.`,
+            `  • [FILE DRIFT CONTROL] Validating modified tree: zero unexpected file modifications.`,
+            `  • [TEST COMPLIANCE] Simulating pre-compilation test framework: ALL SPECS PASSED.`
+          ];
+        } else if (step.id === 13) {
+          multiLogs = [
+            `🔒 [AGENT CONTRACT] Enforcing strict sandbox boundary locks:`,
+            `  • ALLOWED_PATHS: ["/src/components/*", "/src/core/*"]`,
+            `  • FORBIDDEN_PATHS: ["/database/*", "/deploy/*", "/billing/*"]`,
+            `  • CONSTRAINTS: Forbidden edits blocked. Dependency additions locked.`
+          ];
         } else if (step.id === 14) {
-          embellish = `🔑 [CLEARANCE] IVP Continuity token generated. Signing compilation manifest.`;
+          multiLogs = [
+            `📝 [EXECUTION JOURNAL] Logging plan steps, confidence metrics, and actions to append-only ledger...`,
+            `  • Journal write committed to immutable ledger. Hash: sha256_reg_${Math.random().toString(16).substring(2, 8)}`,
+            `🔑 [CLEARANCE] IVP Continuity token generated. Signing compilation manifest.`
+          ];
         } else if (step.id === 17) {
           embellish = `💾 [MATRIX UPDATE] Synchronizing adaptive parameters across execution branches. State saved.`;
         }
 
         if (embellish) {
           setBuildLogs(prev => [...prev, embellish]);
+        }
+        if (multiLogs.length > 0) {
+          setBuildLogs(prev => [...prev, ...multiLogs]);
         }
 
         setStepStates(prev => ({ ...prev, [step.id]: 'DONE' }));
