@@ -52,18 +52,51 @@ export default function ProgressiveExperience({
   // Layer 2 active tool selector
   const [activeTool, setActiveTool] = useState<'ASK' | 'SCHEMA' | 'VERIFY'>('ASK');
 
-  // Static list of ultra-clean realistic recent projects
-  const RECENT_PROJECTS = [
-    { title: 'InspectionOS', desc: 'Offline mobile reporting with PDF compliance validation' },
-    { title: 'My SaaS', desc: 'Multi-tenant subscription ledger with Stripe integration' },
-    { title: 'Continue Yesterday\'s Work', desc: 'Consolidating institutional memory across databases' }
+  // Dynamically managed list of actual user-authored recent projects, starting completely empty
+  const [recentProjects, setRecentProjects] = useState<{ title: string; desc: string }[]>(() => {
+    const saved = localStorage.getItem('arg_recent_projects_v1.6');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const PLACEHOLDERS = [
+    "Describe what you want to build...",
+    "E.g., A client booking system with automated reminders...",
+    "E.g., An offline inventory app for a local warehouse...",
+    "E.g., A shared family recipe book with meal planners...",
+    "E.g., A customer dashboard with real-time feedback logging..."
   ];
+
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+
+  React.useEffect(() => {
+    if (currentLayer !== 1) return;
+    const interval = setInterval(() => {
+      setPlaceholderIdx((prev) => (prev + 1) % PLACEHOLDERS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [currentLayer]);
 
   const handleStartProject = (goal: string) => {
     if (!goal.trim()) return;
     updateCanonicalIntent(goal);
     setActiveGoalText(goal);
     localStorage.setItem('arg_onboarding_active_goal', goal);
+    
+    // Add to actual user recent projects
+    const shortTitle = goal.substring(0, 40) + (goal.length > 40 ? '...' : '');
+    const newProject = { title: shortTitle, desc: goal };
+    const filtered = recentProjects.filter(p => p.desc !== goal);
+    const updated = [newProject, ...filtered].slice(0, 5);
+    setRecentProjects(updated);
+    localStorage.setItem('arg_recent_projects_v1.6', JSON.stringify(updated));
+
     addLog(`User initiated onboarding goal: "${goal.substring(0, 45)}..."`, 'SYSTEM', 'SEED');
     setLayer(2);
   };
@@ -91,17 +124,12 @@ export default function ProgressiveExperience({
         <div className="w-full max-w-xl mx-auto space-y-12 relative z-10 text-center animate-fade-in">
           {/* Stunning, high-contrast, bold display title */}
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-1.5 bg-[#FFD700]/10 border border-[#FFD700]/30 px-3 py-1 rounded-full text-[10px] font-mono font-bold text-[#FFD700] uppercase tracking-wider mx-auto select-none">
-              <Sparkles className="w-3.5 h-3.5" />
-              Sovereign Intent Engine
-            </div>
-            
             <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight font-sans uppercase">
               ARG
             </h1>
             
             <p className="text-xs md:text-sm text-gray-400 font-medium max-w-md mx-auto leading-relaxed">
-              Translate plain English ideas into verified software specifications and robust database schemas instantly.
+              Describe what you want to build. We’ll organize the details, secure the architecture, and ensure your progress is never lost.
             </p>
           </div>
 
@@ -122,7 +150,7 @@ export default function ProgressiveExperience({
                 type="text"
                 value={goalInput}
                 onChange={(e) => setGoalInput(e.target.value)}
-                placeholder="E.g., Build an inspection reporting app with PDF generation and offline sync..."
+                placeholder={PLACEHOLDERS[placeholderIdx]}
                 className="flex-1 bg-[#090909] border border-[#222] focus:border-[#FFD700] rounded-xl px-4 py-3.5 text-xs md:text-sm text-white placeholder-gray-600 outline-none transition font-sans shadow-inner text-center sm:text-left"
                 autoFocus
               />
@@ -138,31 +166,33 @@ export default function ProgressiveExperience({
           </div>
 
           {/* Recent Projects Separator */}
-          <div className="max-w-md mx-auto space-y-4 pt-4 border-t border-[#111]">
-            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block font-bold">
-              Recent Projects
-            </span>
-            
-            <div className="grid grid-cols-1 gap-2.5">
-              {RECENT_PROJECTS.map((proj) => (
-                <button
-                  key={proj.title}
-                  onClick={() => handleStartProject(`${proj.title} - ${proj.desc}`)}
-                  className="bg-[#070707] hover:bg-[#0c0c0c] border border-[#1a1a1a] hover:border-gray-800 p-3.5 rounded-xl text-left transition-all duration-300 flex items-center justify-between group cursor-pointer"
-                >
-                  <div className="space-y-0.5 max-w-[85%]">
-                    <span className="text-xs font-bold text-white group-hover:text-[#FFD700] transition-colors font-mono block">
-                      • {proj.title}
-                    </span>
-                    <span className="text-[10px] text-gray-500 truncate block font-sans">
-                      {proj.desc}
-                    </span>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-white transition-colors group-hover:translate-x-0.5" />
-                </button>
-              ))}
+          {recentProjects.length > 0 && (
+            <div className="max-w-md mx-auto space-y-4 pt-4 border-t border-[#111]">
+              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block font-bold">
+                Recent Projects
+              </span>
+              
+              <div className="grid grid-cols-1 gap-2.5">
+                {recentProjects.map((proj, idx) => (
+                  <button
+                    key={`${proj.title}-${idx}`}
+                    onClick={() => handleStartProject(proj.desc)}
+                    className="bg-[#070707] hover:bg-[#0c0c0c] border border-[#1a1a1a] hover:border-gray-800 p-3.5 rounded-xl text-left transition-all duration-300 flex items-center justify-between group cursor-pointer"
+                  >
+                    <div className="space-y-0.5 max-w-[85%]">
+                      <span className="text-xs font-bold text-white group-hover:text-[#FFD700] transition-colors font-mono block">
+                        • {proj.title}
+                      </span>
+                      <span className="text-[10px] text-gray-500 truncate block font-sans">
+                        {proj.desc}
+                      </span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-white transition-colors group-hover:translate-x-0.5" />
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
