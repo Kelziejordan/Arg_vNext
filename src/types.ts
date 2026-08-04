@@ -62,6 +62,133 @@ export interface MandateAuditReport {
   overallSummary: string;
 }
 
+// Active AI Model Definition for switching AI engines
+export interface AiModel {
+  id: string;
+  name: string;
+  provider: string;
+  badge: string;
+  badgeBg: string;
+  badgeColor: string;
+  description: string;
+  tag: string;
+  isAuto?: boolean;
+}
+
+export const POPULAR_AI_MODELS: AiModel[] = [
+  {
+    id: 'arg-auto',
+    name: 'ARG Sovereign Engine',
+    provider: 'ARG Core Router',
+    badge: 'AUTO SELECT',
+    badgeBg: 'bg-[#FFD700]/10 border-[#FFD700]/30',
+    badgeColor: 'text-[#FFD700]',
+    description: 'Dynamic multi-agent router auto-selecting the optimal model per task intent',
+    tag: 'Default',
+    isAuto: true,
+  },
+  {
+    id: 'gemini-1.5-pro',
+    name: 'Gemini 1.5 Pro',
+    provider: 'Google DeepMind',
+    badge: '1M+ CONTEXT',
+    badgeBg: 'bg-blue-500/10 border-blue-500/30',
+    badgeColor: 'text-blue-400',
+    description: '1M+ context window, ultra-high reasoning & multimodal precision',
+    tag: 'Google',
+  },
+  {
+    id: 'gemini-1.5-flash',
+    name: 'Gemini 1.5 Flash',
+    provider: 'Google DeepMind',
+    badge: 'ULTRA FAST',
+    badgeBg: 'bg-sky-500/10 border-sky-500/30',
+    badgeColor: 'text-sky-400',
+    description: 'Sub-second execution speed, low latency, lightweight agentic loops',
+    tag: 'Google',
+  },
+  {
+    id: 'claude-3.5-sonnet',
+    name: 'Claude 3.5 Sonnet',
+    provider: 'Anthropic',
+    badge: 'SOTA CODE',
+    badgeBg: 'bg-amber-500/10 border-amber-500/30',
+    badgeColor: 'text-amber-400',
+    description: 'Industry-leading code generation, architectural analysis & complex logic',
+    tag: 'Anthropic',
+  },
+  {
+    id: 'claude-3.5-haiku',
+    name: 'Claude 3.5 Haiku',
+    provider: 'Anthropic',
+    badge: 'SPEED & REASONING',
+    badgeBg: 'bg-orange-500/10 border-orange-500/30',
+    badgeColor: 'text-orange-400',
+    description: 'High-speed reasoning, rapid refactoring & concise structural outputs',
+    tag: 'Anthropic',
+  },
+  {
+    id: 'gpt-4o',
+    name: 'GPT-4o',
+    provider: 'OpenAI',
+    badge: 'OMNI-MODAL',
+    badgeBg: 'bg-emerald-500/10 border-emerald-500/30',
+    badgeColor: 'text-emerald-400',
+    description: 'Flagship omni model with fast, robust structured JSON outputs',
+    tag: 'OpenAI',
+  },
+  {
+    id: 'o3-mini',
+    name: 'o3-mini',
+    provider: 'OpenAI',
+    badge: 'REASONING CHAIN',
+    badgeBg: 'bg-teal-500/10 border-teal-500/30',
+    badgeColor: 'text-teal-400',
+    description: 'Advanced step-by-step reasoning & complex mathematical verification',
+    tag: 'OpenAI',
+  },
+  {
+    id: 'deepseek-v3',
+    name: 'DeepSeek V3',
+    provider: 'DeepSeek',
+    badge: '671B MOE',
+    badgeBg: 'bg-indigo-500/10 border-indigo-500/30',
+    badgeColor: 'text-indigo-400',
+    description: 'Open Mixture-of-Experts engine tailored for high-scale software development',
+    tag: 'DeepSeek',
+  },
+  {
+    id: 'deepseek-r1',
+    name: 'DeepSeek R1',
+    provider: 'DeepSeek',
+    badge: 'OPEN REASONER',
+    badgeBg: 'bg-violet-500/10 border-violet-500/30',
+    badgeColor: 'text-violet-400',
+    description: 'Open-weights reasoning model with verifiable chain-of-thought outputs',
+    tag: 'DeepSeek',
+  },
+  {
+    id: 'llama-3.3-70b',
+    name: 'Llama 3.3 70B',
+    provider: 'Meta AI',
+    badge: 'OPEN SOURCE',
+    badgeBg: 'bg-cyan-500/10 border-cyan-500/30',
+    badgeColor: 'text-cyan-400',
+    description: 'Open-source 70B flagship model for privacy-first architecture compliance',
+    tag: 'Meta',
+  },
+  {
+    id: 'mistral-large-2',
+    name: 'Mistral Large 2',
+    provider: 'Mistral AI',
+    badge: '123B FLAGSHIP',
+    badgeBg: 'bg-rose-500/10 border-rose-500/30',
+    badgeColor: 'text-rose-400',
+    description: 'European frontier model optimized for multilingual code & reasoning tasks',
+    tag: 'Mistral',
+  },
+];
+
 export enum DomainProtocol {
   PROTOCOL_A = 'PROTOCOL_A_BIOMETRIC',
   PROTOCOL_B = 'PROTOCOL_B_CYBER_KINETIC',

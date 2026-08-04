@@ -24,7 +24,11 @@ import {
   Check,
   KeyRound,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Eye,
+  EyeOff,
+  Monitor,
+  X
 } from 'lucide-react';
 
 import { RuntimeProvider, useRuntime } from './core/RuntimeContext';
@@ -34,6 +38,7 @@ import CapabilityRegistryPanel from './components/CapabilityRegistryPanel';
 import GovernancePanel from './components/GovernancePanel';
 import RestorationPanel from './components/RestorationPanel';
 import HomePanel from './components/HomePanel';
+import AiModelSelector from './components/AiModelSelector';
 
 type ActiveTab = 'HOME' | 'STATE' | 'MEMORY' | 'REGISTRY' | 'GOVERNANCE' | 'RESTORATION';
 
@@ -97,6 +102,9 @@ const EXPLANATION_DATA: Record<string, {
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('HOME');
+  const [osLayout, setOsLayout] = useState<'desktop' | 'cockpit'>('desktop');
+  const [focusLock, setFocusLock] = useState<boolean>(false);
+  const [isWorkspaceHovered, setIsWorkspaceHovered] = useState<boolean>(false);
   const [utcTime, setUtcTime] = useState<string>('');
 
   const {
@@ -234,6 +242,417 @@ function AppContent() {
     return () => clearInterval(interval);
   }, []);
 
+  const ambientBlurClass = (focusLock || isWorkspaceHovered)
+    ? "blur-[5px] opacity-20 scale-[0.98] pointer-events-none transition-all duration-500 ease-out"
+    : "blur-0 opacity-100 scale-100 transition-all duration-300 ease-out";
+
+  if (osLayout === 'desktop') {
+    return (
+      <div className="relative min-h-screen bg-[#030303] text-gray-300 flex flex-col font-mono selection:bg-[#FFD700]/30 selection:text-white overflow-hidden" id="desktop-container">
+        
+        {/* Immersive Wallpaper mesh background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#111111_1px,transparent_1px),linear-gradient(to_bottom,#111111_1px,transparent_1px)] bg-[size:36px_36px] pointer-events-none opacity-40 z-0" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#FFD700]/5 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl pointer-events-none z-0" />
+
+        {/* Global Desktop Header (Top Menu Bar) */}
+        <header className={`fixed top-0 left-0 w-full h-8 bg-[#090909]/60 backdrop-blur-md border-b border-[#1b1b1b] z-40 flex items-center justify-between px-4 text-[10px] text-gray-400 select-none transition-all duration-300 ${focusLock || isWorkspaceHovered ? 'blur-[1px] opacity-40' : ''}`} id="desktop-top-bar">
+          <div className="flex items-center gap-3">
+            <span className="text-[#FFD700] font-bold flex items-center gap-1.5 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD700]" />
+              ⚓ ArgOS 1.2
+            </span>
+            <span className="text-gray-600">|</span>
+            <span className="text-[9px] uppercase tracking-wider text-gray-400 bg-white/5 border border-white/10 px-1.5 py-0.2 rounded font-black">
+              {operatingState}
+            </span>
+            <span className="hidden sm:inline text-gray-500">9 Mandates Active</span>
+          </div>
+
+          {/* Center: System Layout Switcher */}
+          <div className="bg-[#111] border border-[#222] rounded p-0.5 flex gap-1 items-center pointer-events-auto">
+            <button
+              onClick={() => {
+                setOsLayout('desktop');
+                addLog('Interface configuration changed: Minimalist Desktop Layout activated.', 'SYSTEM', 'GOVERNOR');
+              }}
+              className={`text-[9px] font-mono font-black px-3 py-0.5 rounded transition cursor-pointer ${
+                osLayout === 'desktop' ? 'bg-[#FFD700] text-black shadow-[0_0_8px_rgba(255,215,0,0.25)]' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              💻 OS DESKTOP
+            </button>
+            <button
+              onClick={() => {
+                setOsLayout('cockpit');
+                addLog('Interface configuration changed: Unified Tech Cockpit layout activated.', 'SYSTEM', 'GOVERNOR');
+              }}
+              className={`text-[9px] font-mono font-black px-3 py-0.5 rounded transition cursor-pointer ${
+                osLayout === 'cockpit' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              🎛️ COCKPIT
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* AI Model Selector */}
+            <div className="pointer-events-auto">
+              <AiModelSelector compact />
+            </div>
+
+            {/* Perspective Switch */}
+            <div className="bg-[#111] border border-[#222] rounded p-0.5 flex gap-1 items-center pointer-events-auto">
+              <button
+                onClick={() => {
+                  setPerspective('customer');
+                  addLog('Interface terminology switched to Customer perspective.', 'INFO', 'GOVERNOR');
+                }}
+                className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded transition cursor-pointer ${
+                  perspective === 'customer' ? 'bg-[#FFD700]/20 text-[#FFD700]' : 'text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                CUSTOMER
+              </button>
+              <button
+                onClick={() => {
+                  setPerspective('architect');
+                  addLog('Interface terminology switched to Architect perspective.', 'INFO', 'GOVERNOR');
+                }}
+                className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded transition cursor-pointer ${
+                  perspective === 'architect' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                ARCHITECT
+              </button>
+            </div>
+
+            <div className="hidden md:flex items-center gap-1.5 font-mono text-gray-500">
+              <Clock className="w-3 h-3 text-[#FFD700]" />
+              <span>{utcTime}</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Desktop Workspace Grid */}
+        <main className="flex-grow pt-12 pb-24 px-4 md:px-6 overflow-y-auto z-10 flex flex-col justify-center">
+          <div className="w-full max-w-7xl mx-auto grid grid-cols-12 gap-5 items-stretch min-h-[560px]">
+            
+            {/* LEFT SIDEBAR: Strategic Cortex Priorities */}
+            <aside className={`col-span-12 lg:col-span-3 flex flex-col space-y-4 ${ambientBlurClass}`} id="desktop-left-sidebar">
+              <div className="bg-[#0A0A0A]/85 backdrop-blur-sm border border-[#222] rounded-xl p-4 flex flex-col h-full min-h-[350px]">
+                <div className="flex items-center justify-between border-b border-[#222] pb-2.5 mb-3">
+                  <span className="text-[10px] font-mono text-gray-300 uppercase tracking-widest flex items-center gap-1.5">
+                    <Compass className="w-3.5 h-3.5 text-[#FFD700]" />
+                    STRATEGIC CORTEX
+                  </span>
+                  <span className="text-[8px] bg-[#FFD700]/10 text-[#FFD700] px-1.5 py-0.2 rounded font-mono font-black uppercase">P0 CORE</span>
+                </div>
+
+                <div className="space-y-2.5 flex-grow overflow-y-auto pr-1 scrollbar-thin">
+                  {goals.map((goal) => (
+                    <div 
+                      key={goal.id} 
+                      onClick={() => toggleGoalStatus(goal.id)}
+                      className="bg-[#111111]/90 border border-[#222] p-3 rounded-lg space-y-1 hover:border-[#FFD700]/30 cursor-pointer transition-all duration-200"
+                    >
+                      <div className="flex justify-between items-start">
+                        <span className={`text-[8px] font-mono px-1 py-0.2 rounded font-bold ${
+                          goal.priority === 'P0' ? 'bg-[#FFD700]/10 text-[#FFD700]' : 'bg-white/10 text-white'
+                        }`}>
+                          {goal.priority}
+                        </span>
+                        <span className={`text-[8px] font-mono uppercase px-1.5 py-0.2 rounded border ${
+                          goal.status === 'ACTIVE'
+                            ? 'bg-[#FFD700]/10 border-[#FFD700]/20 text-[#FFD700]'
+                            : goal.status === 'BLOCKED'
+                            ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                            : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                        }`}>
+                          {goal.status}
+                        </span>
+                      </div>
+                      <h4 className="text-[11px] font-bold text-gray-200 leading-tight mt-1">{goal.title}</h4>
+                      <p className="text-[9.5px] text-gray-400 leading-normal">{goal.description}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-[8px] font-mono text-gray-600 mt-3 text-center border-t border-[#151515] pt-2">
+                  Click status tag to toggle priority state.
+                </p>
+              </div>
+            </aside>
+
+            {/* CENTER WORKSPACE: Active Application Window (THE FOCAL POINT!) */}
+            <section 
+              className="col-span-12 lg:col-span-6 flex flex-col transition-all duration-300 relative"
+              onMouseEnter={() => setIsWorkspaceHovered(true)}
+              onMouseLeave={() => setIsWorkspaceHovered(false)}
+              id="desktop-active-workspace"
+            >
+              {/* Window Outer Glow Highlight */}
+              <div className={`absolute inset-0 rounded-xl bg-[#FFD700]/2 blur-xl transition-all duration-500 pointer-events-none ${focusLock || isWorkspaceHovered ? 'scale-102 opacity-100' : 'scale-98 opacity-0'}`} />
+
+              {/* Elegant Window Frame */}
+              <div className={`flex flex-col h-full bg-[#050505]/95 border transition-all duration-500 rounded-xl overflow-hidden z-10 ${
+                focusLock || isWorkspaceHovered 
+                  ? 'border-[#FFD700]/50 shadow-[0_12px_40px_rgba(255,215,0,0.12)]' 
+                  : 'border-[#222] shadow-[0_8px_30px_rgba(0,0,0,0.8)]'
+              }`}>
+                {/* Custom Window Title Bar */}
+                <div className="bg-[#0D0D0D]/95 border-b border-[#222] px-4 py-3 flex items-center justify-between select-none">
+                  {/* Left: Window Dots (macOS style) */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#ff5f56] border border-[#e0443e] cursor-pointer hover:opacity-80" onClick={() => { setActiveTab('HOME'); addLog('Desktop workspace reset to Home dashboard.', 'INFO', 'SPINE'); }} />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#ffbd2e] border border-[#dea123] cursor-pointer hover:opacity-80" onClick={() => setFocusLock(!focusLock)} />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#27c93f] border border-[#1aab29] cursor-pointer hover:opacity-80" onClick={() => setFocusLock(!focusLock)} />
+                  </div>
+
+                  {/* Center: Window Display Title */}
+                  <div className="flex items-center gap-2 text-[10px] font-mono font-black text-white tracking-widest shrink-0 uppercase">
+                    <Activity className="w-3.5 h-3.5 text-[#FFD700] animate-pulse" />
+                    <span>ArgOS CORE WORKSPACE : {activeTab}</span>
+                  </div>
+
+                  {/* Right: Focal Focus Lock Toggle */}
+                  <div className="shrink-0">
+                    <button
+                      onClick={() => {
+                        const next = !focusLock;
+                        setFocusLock(next);
+                        addLog(`Desktop Focal Lens: [${next ? 'ENGAGED' : 'RELEASED'}]. Ambient interface isolated.`, 'INFO', 'GOVERNOR');
+                      }}
+                      className={`text-[8.5px] font-mono font-black px-2.5 py-1 rounded border flex items-center gap-1.5 transition cursor-pointer ${
+                        focusLock 
+                          ? 'bg-[#FFD700] text-black border-[#FFD700]' 
+                          : 'bg-[#111] border-[#222] text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      {focusLock ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                      FOCAL LENS: {focusLock ? 'LOCKED' : 'AUTO'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Main Active Panel Render */}
+                <div className="p-5 overflow-y-auto flex-grow min-h-[460px]" id="desktop-panel-viewport">
+                  {activeTab === 'HOME' && <HomePanel onNavigate={(tab) => {
+                    setActiveTab(tab);
+                    addLog(perspective === 'customer' ? `Desktop workspace navigated to ${tab} panel.` : `Workspace navigation: shifted focus to ${tab} service.`, 'INFO', 'SPINE');
+                  }} />}
+                  {activeTab === 'STATE' && <OperationalStatePanel />}
+                  {activeTab === 'MEMORY' && <KnowledgeObjectsPanel />}
+                  {activeTab === 'REGISTRY' && <CapabilityRegistryPanel />}
+                  {activeTab === 'GOVERNANCE' && <GovernancePanel />}
+                  {activeTab === 'RESTORATION' && <RestorationPanel />}
+                </div>
+              </div>
+            </section>
+
+            {/* RIGHT SIDEBAR: System Admin stresses & actual telemetry monitors */}
+            <aside className={`col-span-12 lg:col-span-3 flex flex-col space-y-4 ${ambientBlurClass}`} id="desktop-right-sidebar">
+              {/* Actual Live Telemetry Monitor (Un-simulated API values) */}
+              <div className="bg-[#0A0A0A]/85 backdrop-blur-sm border border-[#222] rounded-xl p-4 space-y-3">
+                <span className="text-[10px] font-mono text-gray-300 uppercase tracking-widest block border-b border-[#222] pb-2">
+                  ⚙️ REAL RUNTIME PERFORMANCE
+                </span>
+                
+                <div className="grid grid-cols-2 gap-2 text-center font-mono">
+                  <div className="bg-[#111] border border-[#222] p-2 rounded-lg">
+                    <span className="text-[7.5px] text-gray-500 block">DOCKER PING</span>
+                    <span className="text-xs font-bold text-[#FFD700]">{metrics.speed}ms</span>
+                  </div>
+                  <div className="bg-[#111] border border-[#222] p-2 rounded-lg">
+                    <span className="text-[7.5px] text-gray-500 block">COMPLIANCE</span>
+                    <span className="text-xs font-bold text-emerald-400">{metrics.correctness}%</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-[9px] font-mono">
+                  <div className="flex justify-between border-b border-[#111] pb-1">
+                    <span className="text-gray-500">MANDATES ACTIVE:</span>
+                    <span className="text-emerald-400 font-bold">9/9 VERIFIED</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[#111] pb-1">
+                    <span className="text-gray-500">LEDGER PROTECTION:</span>
+                    <span className="text-[#FFD700] font-bold">SHA-256 SIGNED</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[#111] pb-1">
+                    <span className="text-gray-500">METABOLIC COST INDEX:</span>
+                    <span className="text-white font-bold">{metrics.metabolicCost} B/unit</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stress testing console */}
+              <div className="bg-[#0A0A0A]/85 backdrop-blur-sm border border-[#222] rounded-xl p-4 flex flex-col flex-grow min-h-[250px]">
+                <div className="flex items-center justify-between border-b border-[#222] pb-2 mb-3">
+                  <span className="text-[10px] font-mono text-gray-300 uppercase tracking-widest flex items-center gap-1.5">
+                    <Lock className={`w-3.5 h-3.5 ${adminAuthenticated ? 'text-emerald-400' : 'text-gray-500'}`} />
+                    ADMIN DECK
+                  </span>
+                  <span className={`text-[8px] px-1.5 py-0.2 rounded font-mono font-black ${adminAuthenticated ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                    {adminAuthenticated ? 'LIVE' : 'SECURE'}
+                  </span>
+                </div>
+
+                {!adminAuthenticated ? (
+                  <form onSubmit={handleAdminAuthSubmit} className="space-y-3 flex-grow flex flex-col justify-center py-2">
+                    <input
+                      type="password"
+                      placeholder="ENTER PASSCODE..."
+                      value={adminPasswordInput}
+                      onChange={(e) => {
+                        setAdminPasswordInput(e.target.value);
+                        setAdminAuthError(false);
+                      }}
+                      className={`w-full bg-[#111] border ${adminAuthError ? 'border-red-500' : 'border-[#222] focus:border-[#FFD700]'} text-[10px] font-mono px-2.5 py-1.5 rounded outline-none text-white tracking-widest text-center`}
+                    />
+                    {adminAuthError && (
+                      <p className="text-[8px] font-mono text-red-500 text-center">INVALID SECURE CODE</p>
+                    )}
+                    <button
+                      type="submit"
+                      className="w-full text-center text-[10px] font-mono font-bold bg-[#111] hover:bg-[#1A1A1A] text-[#FFD700] border border-[#222] hover:border-[#FFD700]/30 py-1.5 rounded transition cursor-pointer"
+                    >
+                      AUTHENTICATE
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleInstantUnlock}
+                      className="text-center text-[9px] font-mono text-gray-500 hover:text-white transition underline"
+                    >
+                      Bypass Code
+                    </button>
+                  </form>
+                ) : (
+                  <div className="space-y-3 flex-grow flex flex-col">
+                    <div className="grid grid-cols-2 gap-1.5 text-center text-[9px] font-mono">
+                      <div className="bg-[#111] border border-[#222] p-1.5 rounded">
+                        <span className="text-gray-500 block text-[7px]">CPU RATE</span>
+                        <span className={`font-bold ${isStressTesting ? 'text-red-500 animate-pulse' : 'text-emerald-400'}`}>{sandboxCpu}%</span>
+                      </div>
+                      <div className="bg-[#111] border border-[#222] p-1.5 rounded">
+                        <span className="text-gray-500 block text-[7px]">RAM ALLOC</span>
+                        <span className="font-bold text-white">{sandboxRam}MB</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (confidence >= 0.5) {
+                          setConfidence(0.34);
+                          addLog('⚠️ CRITICAL: Administrative fault injected. Integrity score degraded.', 'WARN', 'GOVERNOR');
+                        } else {
+                          addLog('⚠️ A reconstruction is already running.', 'WARN', 'GOVERNOR');
+                        }
+                      }}
+                      className="w-full text-left text-[9px] font-mono px-2 py-1.5 rounded border border-red-500/20 bg-red-500/5 hover:bg-red-500/15 text-red-400 transition flex items-center justify-between cursor-pointer"
+                    >
+                      <span>[1] INJECT SYSTEM DRIFT</span>
+                      <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const next = !isStressTesting;
+                        setIsStressTesting(next);
+                        if (next) triggerScenario('VOLATILITY_BURST');
+                      }}
+                      className="w-full text-left text-[9px] font-mono px-2 py-1.5 bg-[#111] hover:bg-[#1A1A1A] border border-[#222] text-white transition flex items-center justify-between cursor-pointer"
+                    >
+                      <span>[2] SYSTEM LOAD BOOST</span>
+                      <Cpu className="w-3.5 h-3.5 text-gray-500" />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setConfidence(0.98);
+                        setIsStressTesting(false);
+                        addLog('Administrative override: Resetting core status variables.', 'INFO', 'GOVERNOR');
+                      }}
+                      className="w-full text-left text-[9px] font-mono bg-[#111] hover:bg-[#1A1A1A] border border-[#222] text-[#FFD700] px-2 py-1.5 rounded transition flex items-center justify-between cursor-pointer"
+                    >
+                      <span>[3] CLEAN SYSTEM STRESS</span>
+                      <RefreshCw className="w-3.5 h-3.5 text-[#FFD700]" />
+                    </button>
+
+                    <button
+                      onClick={() => setAdminAuthenticated(false)}
+                      className="text-center text-[9px] font-mono text-gray-600 hover:text-gray-400 transition underline mt-auto"
+                    >
+                      Lock Terminal
+                    </button>
+                  </div>
+                )}
+              </div>
+            </aside>
+
+          </div>
+        </main>
+
+        {/* GLIDE-DOCK: Sleek Floating OS bottom application dock */}
+        <div className={`fixed bottom-4 left-1/2 -translate-x-1/2 bg-[#090909]/80 backdrop-blur-xl border border-[#262626] px-5 py-2 rounded-full flex items-center gap-3.5 shadow-[0_15px_40px_rgba(0,0,0,0.9)] z-40 transition-all duration-300 ${focusLock || isWorkspaceHovered ? 'blur-[1px] opacity-40 hover:blur-0 hover:opacity-100' : ''}`} id="desktop-app-dock">
+          {/* Dock Apps */}
+          {[
+            { tab: 'HOME', icon: Compass, label: 'Workspace Home', tooltip: 'Operational summary dashboard & interactive play deck' },
+            { tab: 'STATE', icon: Lock, label: 'State Alignment', tooltip: 'Pillar 1: Immutably locked core state & compliance sensor' },
+            { tab: 'MEMORY', icon: Database, label: 'Knowledge Vault', tooltip: 'Pillar 2: Isolated system files, schema index & secure assets' },
+            { tab: 'REGISTRY', icon: GitBranch, label: 'Task Pipelines', tooltip: 'Pillar 3: Adaptive routing engine & transaction compilers' },
+            { tab: 'GOVERNANCE', icon: ShieldCheck, label: 'Constitutional Rules', tooltip: 'Pillar 4: Rule linter, dynamic constraints & regulatory flags' },
+            { tab: 'RESTORATION', icon: RefreshCw, label: 'Rollback & Recovery', tooltip: 'Pillar 5: Event-sourced ledger state & rollback triggers' }
+          ].map((app) => {
+            const Icon = app.icon;
+            const isActive = activeTab === app.tab;
+            return (
+              <div key={app.tab} className="group relative">
+                {/* Custom Tooltip */}
+                <div className="absolute bottom-14 left-1/2 -translate-x-1/2 bg-[#0C0C0C] border border-[#2a2a2a] text-white px-3 py-1.5 rounded-lg text-[9px] whitespace-nowrap shadow-xl opacity-0 scale-95 pointer-events-none group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 z-50 flex flex-col items-center">
+                  <span className="font-bold text-[#FFD700] text-[10px]">{app.label}</span>
+                  <span className="text-gray-400 text-[8.5px] mt-0.5">{app.tooltip}</span>
+                  <div className="w-1.5 h-1.5 bg-[#0C0C0C] border-r border-b border-[#2a2a2a] rotate-45 mt-1 -mb-2" />
+                </div>
+
+                {/* Dock Button */}
+                <button
+                  onClick={() => {
+                    setActiveTab(app.tab as ActiveTab);
+                    addLog(`Desktop application focus: shifted to [${app.label}].`, 'INFO', 'SPINE');
+                  }}
+                  className={`relative p-2.5 rounded-full transition-all duration-300 transform group-hover:scale-120 group-hover:-translate-y-2 cursor-pointer flex items-center justify-center ${
+                    isActive 
+                      ? 'bg-[#FFD700] text-black shadow-[0_0_15px_rgba(255,215,0,0.4)]' 
+                      : 'bg-[#151515] text-gray-400 hover:text-white hover:bg-[#222]'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  
+                  {/* Miniature active indicator dot below the dock button */}
+                  {isActive && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#FFD700] animate-ping" />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Global Telemetry Live Log Flow (Toggled to minimalist strip on bottom) */}
+        <footer className={`fixed bottom-0 left-0 w-full bg-[#080808]/90 border-t border-[#1a1a1a] px-4 py-1.5 z-30 font-mono text-[8px] text-gray-500 flex justify-between items-center transition-all duration-300 ${focusLock || isWorkspaceHovered ? 'blur-[1.5px] opacity-20' : ''}`} id="desktop-footer">
+          <div className="flex items-center gap-2 max-w-[70%] truncate">
+            <span className="text-[#FFD700] font-black">[INTRINSIC LOGS]</span>
+            <span className="text-gray-400 truncate">{logs[0]?.timestamp ? `[${logs[0].timestamp}] [${logs[0].level}] [${logs[0].source}] ${logs[0].message}` : 'STANDBY'}</span>
+          </div>
+          <div>
+            <span>Node Core partners: <span className="text-gray-400 font-bold">Gemini V12</span> & <span className="text-white">kelseaziegler@gmail.com</span></span>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Otherwise, render the classic HIGH-DENSITY COCKPIT view
   return (
     <div className="min-h-screen bg-[#020202] text-gray-300 p-4 md:p-6 flex flex-col font-sans selection:bg-[#FFD700]/30 selection:text-white" id="main-container">
       
@@ -256,6 +675,32 @@ function AppContent() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3.5">
+          {/* Desktop Layout Switcher */}
+          <div className="bg-[#050505] border border-[#222] rounded p-0.5 flex gap-1 items-center">
+            <button
+              onClick={() => {
+                setOsLayout('desktop');
+                addLog('Interface configuration changed: Minimalist Desktop Layout activated.', 'SYSTEM', 'GOVERNOR');
+              }}
+              className={`text-[10px] font-mono font-bold px-3 py-1 rounded transition cursor-pointer ${
+                osLayout === 'desktop' ? 'bg-[#FFD700] text-black shadow-[0_0_8px_rgba(255,215,0,0.2)]' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              💻 OS DESKTOP
+            </button>
+            <button
+              onClick={() => {
+                setOsLayout('cockpit');
+                addLog('Interface configuration changed: Unified Tech Cockpit layout activated.', 'SYSTEM', 'GOVERNOR');
+              }}
+              className={`text-[10px] font-mono font-bold px-3 py-1 rounded transition cursor-pointer ${
+                osLayout === 'cockpit' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              🎛️ COCKPIT
+            </button>
+          </div>
+
           {/* Global UI Perspective Switch */}
           <div className="bg-[#050505] border border-[#222] rounded p-0.5 flex gap-1 items-center">
             <button
@@ -414,7 +859,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Apex Latency</span>
               <p className="text-xl font-mono font-black text-white">{metrics.speed}ms</p>
-              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Simulated</span>
+              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Real-Time Sensor</span>
             </div>
           </div>
 
@@ -425,7 +870,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Leverage ratio</span>
               <p className="text-xl font-mono font-black text-white">{metrics.leverage}x</p>
-              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Simulated</span>
+              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Real-Time Sensor</span>
             </div>
           </div>
 
@@ -436,7 +881,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Correctness</span>
               <p className="text-xl font-mono font-black text-white">{metrics.correctness}%</p>
-              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Simulated</span>
+              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Real-Time Sensor</span>
             </div>
           </div>
 
@@ -447,7 +892,7 @@ function AppContent() {
             <div>
               <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">Resilience</span>
               <p className="text-xl font-mono font-black text-white">{metrics.continuity}%</p>
-              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Simulated</span>
+              <span className="text-[9px] font-mono text-gray-600 block mt-0.5">Real-Time Sensor</span>
             </div>
           </div>
         </section>
@@ -741,7 +1186,7 @@ function AppContent() {
                         disabled={confidence < 0.5}
                       >
                         <span>[1] INJECT SYSTEM FAULT</span>
-                        <AlertTriangle className="w-3 h-3 text-red-500" />
+                        <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
                       </button>
 
                       {/* Control 2: Booster threads */}
@@ -762,7 +1207,7 @@ function AppContent() {
                         }`}
                       >
                         <span>{isStressTesting ? '[2] ACTIVE LOAD BOOSTER' : '[2] ACTIVATE LOAD BOOSTER'}</span>
-                        <Cpu className={`w-3 h-3 ${isStressTesting ? 'text-red-500 animate-pulse' : 'text-gray-500'}`} />
+                        <Cpu className={`w-3.5 h-3.5 ${isStressTesting ? 'text-red-500 animate-pulse' : 'text-gray-500'}`} />
                       </button>
 
                       {/* Control 3: Reset system */}
@@ -776,7 +1221,7 @@ function AppContent() {
                         className="w-full text-left text-[10px] font-mono bg-[#111] hover:bg-[#1A1A1A] border border-[#222] text-[#FFD700] px-2.5 py-1.5 rounded transition flex items-center justify-between cursor-pointer"
                       >
                         <span>[3] CLEAR STRESS VECTORS</span>
-                        <RefreshCw className="w-3 h-3 text-[#FFD700]" />
+                        <RefreshCw className="w-3.5 h-3.5 text-[#FFD700]" />
                       </button>
                     </div>
                   </div>

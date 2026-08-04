@@ -32,7 +32,8 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { useRuntime } from '../core/RuntimeContext';
-import { MandateValidatorService } from '../runtime/MandateValidatorService';
+import { PolicyEngineService } from '../services/PolicyEngineService';
+import OperationalChecklist from './OperationalChecklist';
 
 interface TestScenario {
   id: string;
@@ -189,6 +190,86 @@ export default function CapabilityRegistryPanel() {
   const [verificationResult, setVerificationResult] = useState<'NONE' | 'VALID' | 'TAMPERED'>('NONE');
   const [verificationError, setVerificationError] = useState<string | null>(null);
 
+  // --- OPERATIONAL EXECUTION PIPELINE & CHECKLIST ---
+  const INITIAL_CHECKLIST_ITEMS = [
+    // Phase 0: Request Intake
+    { id: 'p0-1', phase: 0, category: 'Request Intake', label: 'User request received', checked: true, skipped: false, flagged: false, justification: '' },
+    { id: 'p0-2', phase: 0, category: 'Request Intake', label: 'User intent captured', checked: true, skipped: false, flagged: false, justification: '' },
+    { id: 'p0-3', phase: 0, category: 'Request Intake', label: 'Primary objective identified', checked: true, skipped: false, flagged: false, justification: '' },
+    { id: 'p0-4', phase: 0, category: 'Request Intake', label: 'Success criteria identified', checked: true, skipped: false, flagged: false, justification: '' },
+    { id: 'p0-5', phase: 0, category: 'Request Intake', label: 'Constraints & safety boundaries identified', checked: true, skipped: false, flagged: false, justification: '' },
+    { id: 'p0-6', phase: 0, category: 'Request Intake', label: 'Missing information or ambiguities detected', checked: false, skipped: true, flagged: false, justification: 'Static scan shows request is fully detailed.' },
+    { id: 'p0-7', phase: 0, category: 'Request Intake', label: 'Operator confirmation received & request accepted', checked: true, skipped: false, flagged: false, justification: '' },
+
+    // Phase 1: Decision Studio
+    { id: 'p1-1', phase: 1, category: 'Decision Studio', label: 'Actual underlying problem mapped', checked: true, skipped: false, flagged: false, justification: '' },
+    { id: 'p1-2', phase: 1, category: 'Decision Studio', label: 'Verify: is the request complete?', checked: true, skipped: false, flagged: false, justification: '' },
+    { id: 'p1-3', phase: 1, category: 'Decision Studio', label: 'Verify: does Knowledge Vault contain similar assets?', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p1-4', phase: 1, category: 'Decision Studio', label: 'Deconfliction of competing goals completed', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p1-5', phase: 1, category: 'Decision Studio', label: 'Determine if collaborative deliberation is required', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p1-6', phase: 1, category: 'Decision Studio', label: 'Assign stable AI expert roles (Architect, Auditor, Referee)', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p1-7', phase: 1, category: 'Decision Studio', label: 'Consensus achieved on implementation strategy', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p1-8', phase: 1, category: 'Decision Studio', label: 'Tangible Decision Report generated & committed', checked: false, skipped: false, flagged: false, justification: '' },
+
+    // Phase 2: Governance Checklist
+    { id: 'p2-1', phase: 2, category: 'Governance', label: 'Constitutional safety mandates enforced', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p2-2', phase: 2, category: 'Governance', label: 'Metabolic cost budget underflow verified', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p2-3', phase: 2, category: 'Governance', label: 'Immutable Core Seed protection loops active', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p2-4', phase: 2, category: 'Governance', label: 'Static audit: clean of unhandled promise rejection states', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p2-5', phase: 2, category: 'Governance', label: 'Verify persona divergence boundaries', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p2-6', phase: 2, category: 'Governance', label: 'Operator sovereignty & truth priority metrics verified', checked: false, skipped: false, flagged: false, justification: '' },
+
+    // Phase 3: Engineering Workflow
+    { id: 'p3-1', phase: 3, category: 'Engineering', label: '17-process compiler pipeline scale assessment complete', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p3-2', phase: 3, category: 'Engineering', label: 'State Determinism checks complete (RemoteData vs Boolean)', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p3-3', phase: 3, category: 'Engineering', label: 'Signal-Driven Asynchrony checks active (AbortController present)', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p3-4', phase: 3, category: 'Engineering', label: 'Static signatures & type boundaries validated', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p3-5', phase: 3, category: 'Engineering', label: 'Interactive layout & responsive view frameworks validated', checked: false, skipped: false, flagged: false, justification: '' },
+
+    // Phase 4: Long-Term Continuity
+    { id: 'p4-1', phase: 4, category: 'Continuity', label: 'Project continuity: offline-first local state synchronized', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p4-2', phase: 4, category: 'Continuity', label: 'Verify: state survives cache clear or session expiration', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p4-3', phase: 4, category: 'Continuity', label: 'Create offline recovery snapshot pointer', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p4-4', phase: 4, category: 'Continuity', label: 'Check: AI-independent system resume points validated', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'p4-5', phase: 4, category: 'Continuity', label: 'Event-sourced action ledger committed & SHA-256 signed', checked: false, skipped: false, flagged: false, justification: '' },
+
+    // Phase X: Reflection & Improvement
+    { id: 'px-1', phase: 5, category: 'Reflection', label: 'Did we solve the user\'s actual problem?', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'px-2', phase: 5, category: 'Reflection', label: 'Were resources allocated optimally? (Specialist counts correct)', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'px-3', phase: 5, category: 'Reflection', label: 'Can lessons learned update the permanent Knowledge Vault?', checked: false, skipped: false, flagged: false, justification: '' },
+    { id: 'px-4', phase: 5, category: 'Reflection', label: 'Identify potential improvements for next constitutional cycle', checked: false, skipped: false, flagged: false, justification: '' }
+  ];
+
+  const [viewMode, setViewMode] = useState<'CLASSIC' | 'CHECKLIST'>('CHECKLIST');
+  const [selectedPhase, setSelectedPhase] = useState<number>(0);
+  const [checklistItems, setChecklistItems] = useState<any[]>(() => {
+    const stored = localStorage.getItem('argos_pipeline_checklist');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return INITIAL_CHECKLIST_ITEMS;
+      }
+    }
+    return INITIAL_CHECKLIST_ITEMS;
+  });
+
+  const [activePipelinePhase, setActivePipelinePhase] = useState<number>(0);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [scanLogs, setScanLogs] = useState<string[]>([]);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingJustification, setEditingJustification] = useState('');
+  const [overallReady, setOverallReady] = useState(0);
+
+  // Sync checklist save
+  useEffect(() => {
+    localStorage.setItem('argos_pipeline_checklist', JSON.stringify(checklistItems));
+    const total = checklistItems.length;
+    const met = checklistItems.filter(item => item.checked || item.skipped).length;
+    setOverallReady(Math.round((met / total) * 100));
+  }, [checklistItems]);
+
   // Initialize and Seed Journal on Mount
   useEffect(() => {
     const stored = localStorage.getItem('argos_execution_journal');
@@ -328,28 +409,30 @@ export default function CapabilityRegistryPanel() {
             return;
           }
 
-          // 2. Continuous Engineering Mandates Audit
+          // 2. Continuous Engineering Mandates Audit (Backed by PolicyEngineService)
           const threadsCount = Math.round(metrics.metabolicCost / 2.5);
-          const auditResult = MandateValidatorService.auditSystem({
+          const auditResult = PolicyEngineService.evaluate({
             operatingState: operatingState,
             confidence: confidence,
             activeThreads: threadsCount,
             aggression: aggression,
-            caution: caution
+            caution: caution,
+            metabolicCost: metrics.metabolicCost
           });
 
           if (!auditResult.passed) {
             clearInterval(interval);
             setIsCompiling(false);
             setCompiledFailure(true);
-            const mandateMsg = `Constitutional audit failed with score ${auditResult.score}% (Requires >= 80%). ${auditResult.overallSummary}`;
+            const failedFindings = auditResult.findings.filter(f => !f.passed).map(f => `${f.code} breach: threshold ${f.threshold}, actual ${f.actual}`).join('; ');
+            const mandateMsg = `Constitutional audit failed with score ${auditResult.score}% (Requires >= 80%). Findings: ${failedFindings}`;
             setMandateError(mandateMsg);
             
             addLog(`[MANDATE_ALIGNMENT_FAILURE] Verification Gate blocked compiler pass. Score: ${auditResult.score}% (Underflow).`, 'ERROR', 'GOVERNOR');
             addLedgerEvent(`COMPILER_MANDATE_FAILURE -> score: ${auditResult.score}`);
             
-            // Append failure block to Crytographic Journal
-            appendJournalBlock('FAILED', auditResult.score, `Mandate Audit Failed: Score ${auditResult.score}% is below threshold. ${auditResult.overallSummary}`);
+            // Append failure block to Cryptographic Journal
+            appendJournalBlock('FAILED', auditResult.score, `Mandate Audit Failed: Score ${auditResult.score}% is below threshold. ${failedFindings}`);
             return;
           }
           
@@ -517,10 +600,47 @@ export default function CapabilityRegistryPanel() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 animate-fade-in" id="capability-registry-workspace">
+    <div className="space-y-6 animate-fade-in" id="capability-registry-workspace">
       
-      {/* Platform Capabilities List (4 columns) */}
-      <div className="md:col-span-4 bg-[#0A0A0A] border border-[#222] p-5 rounded-lg flex flex-col justify-between h-[450px]">
+      {/* View Mode Tabs Selector */}
+      <div className="flex flex-col sm:flex-row items-center justify-between bg-[#0A0A0A] border border-[#222] p-3 rounded-lg gap-3">
+        <span className="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest pl-2">
+          Sovereign Registry & Governance Core
+        </span>
+        <div className="flex bg-[#111] p-1 rounded border border-[#222] shrink-0">
+          <button
+            onClick={() => setViewMode('CHECKLIST')}
+            className={`px-3 py-1.5 rounded text-[10.5px] font-mono font-black transition cursor-pointer uppercase ${
+              viewMode === 'CHECKLIST'
+                ? 'bg-[#FFD700] text-black'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            📋 Pre-Flight Checklist Monitor
+          </button>
+          <button
+            onClick={() => setViewMode('CLASSIC')}
+            className={`px-3 py-1.5 rounded text-[10.5px] font-mono font-black transition cursor-pointer uppercase ${
+              viewMode === 'CLASSIC'
+                ? 'bg-[#FFD700] text-black'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            ⚙️ APEX Compiler & Stress Harness
+          </button>
+        </div>
+      </div>
+
+      {/* Checklist View */}
+      <div className={viewMode === 'CHECKLIST' ? 'block' : 'hidden'}>
+        <OperationalChecklist />
+      </div>
+
+      {/* Classic Grid View */}
+      <div className={viewMode === 'CLASSIC' ? 'grid grid-cols-1 md:grid-cols-12 gap-6' : 'hidden'}>
+        
+        {/* Platform Capabilities List (4 columns) */}
+        <div className="md:col-span-4 bg-[#0A0A0A] border border-[#222] p-5 rounded-lg flex flex-col justify-between h-[450px]">
         <div className="flex justify-between items-center border-b border-[#222] pb-2 mb-3 shrink-0">
           <span className="text-xs font-mono text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
             <GitBranch className="w-3.5 h-3.5 text-[#FFD700]" />
@@ -1317,6 +1437,8 @@ export default function CapabilityRegistryPanel() {
               <div className="text-gray-600 text-center py-4">Click "Activate Loop" above to view realtime engine logs.</div>
             )}
           </div>
+        </div>
+
         </div>
 
       </div>

@@ -4,7 +4,10 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { SystemMetric, SystemLog, PriorityGoal, DomainProtocol } from '../types';
+import { SystemMetric, SystemLog, PriorityGoal, DomainProtocol, AiModel, POPULAR_AI_MODELS } from '../types';
+import { eventLedgerInstance } from '../services/EventLedgerService';
+import { PolicyEngineService } from '../services/PolicyEngineService';
+import { capabilityRegistryInstance } from '../services/CapabilityRegistryService';
 
 export interface StateSnapshot {
   id: string;
@@ -135,11 +138,29 @@ export interface RuntimeContextType {
   // Scenario Runner (Demo scenarios)
   activeScenario: string | null;
   triggerScenario: (scenarioName: string) => void;
+  
+  // Active AI Model Selection
+  selectedModelId: string;
+  selectedModel: AiModel;
+  setSelectedModelId: (id: string) => void;
 }
 
 const RuntimeContext = createContext<RuntimeContextType | undefined>(undefined);
 
 export function RuntimeProvider({ children }: { children: React.ReactNode }) {
+  // AI Model Selection state
+  const [selectedModelId, setSelectedModelIdState] = useState<string>('arg-auto');
+  
+  const selectedModel = POPULAR_AI_MODELS.find(m => m.id === selectedModelId) || POPULAR_AI_MODELS[0];
+
+  const setSelectedModelId = useCallback((id: string) => {
+    setSelectedModelIdState(id);
+    const m = POPULAR_AI_MODELS.find(model => model.id === id);
+    if (m) {
+      eventLedgerInstance.append('MODEL_SWITCH', { modelId: id, modelName: m.name, provider: m.provider });
+    }
+  }, []);
+
   // Perspective state
   const [perspective, setPerspective] = useState<'customer' | 'architect'>('customer');
 
@@ -197,18 +218,22 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     setLogs(prev => [newLog, ...prev].slice(0, 50));
   }, []);
 
-  // Event Ledger list
-  const [ledger, setLedger] = useState<string[]>([
-    `[SYSTEM] State vector committed to index OSS-004. Hash chain verified.`,
-    `[LEDGER] Event emitted: STATE_TRANSITION (CORTEX) -> active_mode: REGULAR`,
-    `[LEDGER] Event emitted: MODE_SELECT (GOVERNOR) -> status: NOMINAL`,
-    `[LEDGER] Event emitted: PLAN_COMMIT -> plan_id: plan_g1_recalibrate_hash`,
-    `[SYSTEM] Snapshot loaded. Restored state: aggression: 0.50, caution: 0.50.`
-  ]);
+  // Real persistent decoupled event ledger state
+  const [ledgerEvents, setLedgerEvents] = useState<any[]>([]);
+
+  useEffect(() => {
+    setLedgerEvents(eventLedgerInstance.getEvents());
+  }, []);
 
   const addLedgerEvent = useCallback((event: string) => {
-    setLedger(prev => [`[LEDGER] ${event}`, ...prev]);
+    eventLedgerInstance.append('SYSTEM_EVENT', { detail: event });
+    setLedgerEvents(eventLedgerInstance.getEvents());
   }, []);
+
+  const ledger = ledgerEvents.map(ev => {
+    const detail = ev.payload.detail || ev.type || 'Operational event committed';
+    return `${detail} | Block: ${ev.id} | Hash: ${ev.hash.substring(12)}`;
+  });
 
   // Snapshots state
   const [snapshots, setSnapshots] = useState<StateSnapshot[]>([
@@ -526,14 +551,14 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         // 1. SPEED = Real-Time Network Ping Latency (ms) to container dev server
         const realLatency = duration || 10;
 
-        // 2. CORRECTNESS = Actual Constitutional Compliance Audit from MandateValidatorService
-        const { MandateValidatorService } = await import('../runtime/MandateValidatorService');
-        const audit = MandateValidatorService.auditSystem({
-          operatingState,
-          confidence,
-          activeThreads: 12 + (simActive ? 4 : 0),
+        // 2. CORRECTNESS = Actual Constitutional Compliance Audit from PolicyEngineService (Speaking data, not simulation)
+        const audit = PolicyEngineService.evaluate({
           aggression,
-          caution
+          caution,
+          activeThreads: 12 + (simActive ? 4 : 0),
+          confidence,
+          operatingState,
+          metabolicCost: Math.max(10, Math.round(JSON.stringify({ logs, snapshots, knowledgeVault, capabilities, ledger }).length / 400))
         });
         const realScore = audit.score;
 
@@ -850,7 +875,11 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
       resetSimulator,
       
       activeScenario,
-      triggerScenario
+      triggerScenario,
+
+      selectedModelId,
+      selectedModel,
+      setSelectedModelId
     }}>
       {children}
     </RuntimeContext.Provider>

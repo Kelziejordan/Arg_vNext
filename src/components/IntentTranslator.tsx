@@ -25,6 +25,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { useRuntime } from '../core/RuntimeContext';
+import AiModelSelector from './AiModelSelector';
 
 interface Preset {
   id: string;
@@ -492,10 +493,17 @@ describe('${name} Core Verification', () => {
           </p>
         </div>
 
-        <div className="text-[10px] font-mono bg-[#111] border border-[#222] px-3 py-1.5 rounded-lg flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse" />
-          <span className="text-gray-400 uppercase">State:</span>
-          <span className="text-white font-bold">READY TO TRANSLATE</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] text-gray-500 font-mono uppercase font-bold hidden sm:inline">Selected AI:</span>
+            <AiModelSelector compact />
+          </div>
+
+          <div className="text-[10px] font-mono bg-[#111] border border-[#222] px-3 py-1.5 rounded-lg flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse" />
+            <span className="text-gray-400 uppercase">State:</span>
+            <span className="text-white font-bold">READY TO TRANSLATE</span>
+          </div>
         </div>
       </div>
 
@@ -943,6 +951,52 @@ describe('${name} Core Verification', () => {
             </div>
           )}
         </div>
+
+        {/* PROGRESSIVE DISCLOSURE ESCALATION BAR */}
+        <div className="bg-[#0b0d0e] border border-[#222] rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-3 font-sans">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#FFD700] animate-pulse" />
+            <div>
+              <span className="text-white font-black text-xs block">Is this response good enough?</span>
+              <span className="text-[10px] text-gray-400 font-mono block">Escalate capability dynamically only when needed</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 font-mono">
+            <button
+              onClick={() => {
+                addLog('User confirmed: Level 1 response satisfied requirements.', 'SUCCESS', 'SPINE');
+              }}
+              className="bg-[#141414] hover:bg-[#1f1f1f] border border-[#333] text-emerald-400 font-bold px-3 py-2 rounded-xl text-[10px] uppercase transition cursor-pointer flex items-center gap-1"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>✓ Good Enough</span>
+            </button>
+
+            <button
+              onClick={() => {
+                addLog('User escalated to Ladder Level 2: Collaborative Deliberation', 'INFO', 'SPINE');
+                window.dispatchEvent(new CustomEvent('SWITCH_DELIBERATION_MODE', { detail: { mode: 'COLLABORATIVE' } }));
+              }}
+              className="bg-[#18150c] hover:bg-[#252010] border border-[#FFD700]/40 text-[#FFD700] font-bold px-3 py-2 rounded-xl text-[10px] uppercase transition cursor-pointer flex items-center gap-1"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Improve Answer</span>
+            </button>
+
+            <button
+              onClick={() => {
+                addLog('User escalated to Ladder Level 3: Architectural Review', 'INFO', 'SPINE');
+                window.dispatchEvent(new CustomEvent('SWITCH_DELIBERATION_MODE', { detail: { mode: 'AUTONOMOUS' } }));
+              }}
+              className="bg-purple-950/40 hover:bg-purple-900/40 border border-purple-500/40 text-purple-300 font-bold px-3 py-2 rounded-xl text-[10px] uppercase transition cursor-pointer flex items-center gap-1"
+            >
+              <Shield className="w-3.5 h-3.5 text-purple-400" />
+              <span>Architectural Review</span>
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );

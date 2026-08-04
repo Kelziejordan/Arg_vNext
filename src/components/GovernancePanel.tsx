@@ -26,6 +26,7 @@ import {
 import { useRuntime } from '../core/RuntimeContext';
 import { ARCHITECTURAL_DICTIONARY } from '../core/TranslationLayer';
 import { GeminiAdapter } from '../adapters/geminiAdapter';
+import { PolicyEngineService } from '../services/PolicyEngineService';
 import { MandateAuditReport, RemoteData, PriorityGoal } from '../types';
 
 interface AIChatLog {
@@ -249,10 +250,23 @@ export default function GovernancePanel() {
     addLedgerEvent,
     confidence,
     setConfidence,
-    setMetrics
+    setMetrics,
+    aggression,
+    caution,
+    metrics
   } = useRuntime();
 
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('SAFEGUARDS');
+
+  // Call the decoupled PolicyEngineService dynamically
+  const liveReport = PolicyEngineService.evaluate({
+    aggression,
+    caution,
+    activeThreads: 12,
+    confidence,
+    operatingState,
+    metabolicCost: metrics.metabolicCost
+  });
 
   // Terminology helper
   const t = (key: keyof typeof ARCHITECTURAL_DICTIONARY, part: 'term' | 'codename' | 'benefit' | 'description' | 'technicalRole' = 'term') => {
@@ -591,6 +605,77 @@ export default function GovernancePanel() {
 
               <div className="text-[9px] font-mono text-center text-gray-600 mt-4 leading-normal uppercase">
                 Sovereign governance dictates that safety, stability, and operator orders outrank any speculative sub-intent.
+              </div>
+            </div>
+
+            {/* Live Policy Engine Data Stream (Pillar 3 Service Integration) */}
+            <div className="lg:col-span-2 bg-[#050505] border border-[#222] rounded p-5 mt-4 flex flex-col space-y-4">
+              <div className="flex items-center justify-between border-b border-[#222] pb-3 mb-1">
+                <div className="flex items-center gap-2.5">
+                  <ShieldAlert className="text-[#FFD700] w-5 h-5" />
+                  <div>
+                    <h2 className="text-xs font-mono font-bold uppercase text-gray-200">PolicyEngineService Audits</h2>
+                    <span className="text-[9px] font-mono text-gray-500 uppercase">Live Constitutional Core Telemetry</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-mono text-gray-400">Compliance score: <span className="text-[#FFD700] font-bold">{liveReport.score}%</span></span>
+                  <span className={`text-[9px] font-mono px-2 py-0.5 rounded font-bold uppercase ${liveReport.passed ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/40' : 'bg-red-950 text-red-400 border border-red-900/40'}`}>
+                    {liveReport.passed ? 'COMPLIANT' : 'NON-COMPLIANT'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-mono text-[10px] border-collapse" id="policy-engine-audits-table">
+                  <thead>
+                    <tr className="border-b border-[#222] text-gray-500 font-bold uppercase">
+                      <th className="pb-2 font-medium">Policy Code</th>
+                      <th className="pb-2 font-medium">Severity</th>
+                      <th className="pb-2 font-medium">Threshold</th>
+                      <th className="pb-2 font-medium">Actual</th>
+                      <th className="pb-2 font-medium">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#111] text-gray-300">
+                    {liveReport.findings.map((f, idx) => (
+                      <tr key={idx} className="hover:bg-[#111]/30 transition">
+                        <td className="py-2.5 font-bold text-gray-200">{f.code}</td>
+                        <td className="py-2.5">
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                            f.severity === 'CRITICAL' ? 'bg-red-950 text-red-400 border border-red-900/40' :
+                            f.severity === 'HIGH' ? 'bg-orange-950 text-orange-400 border border-orange-900/40' :
+                            f.severity === 'MEDIUM' ? 'bg-yellow-950 text-yellow-400 border border-yellow-900/40' :
+                            'bg-blue-950 text-blue-400 border border-blue-900/40'
+                          }`}>
+                            {f.severity}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-gray-400">&lt;= {f.threshold}</td>
+                        <td className="py-2.5 text-[#FFD700] font-bold">{f.actual}</td>
+                        <td className="py-2.5">
+                          <span className={f.passed ? 'text-emerald-400 font-bold' : 'text-red-400 font-black'}>
+                            {f.passed ? '✓ PASSED' : '✗ BREACH'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="bg-[#080808] border border-[#222] p-3 rounded text-[9px] text-gray-500 font-mono flex flex-col space-y-1 leading-normal">
+                <span className="text-gray-400 font-bold uppercase block mb-1">Runtime Remediation Framework</span>
+                {liveReport.findings.filter(f => !f.passed).length === 0 ? (
+                  <span className="text-emerald-500">✓ All system constraints are aligned with nominal baselines. No telemetry remediation active.</span>
+                ) : (
+                  liveReport.findings.filter(f => !f.passed).map((f, idx) => (
+                    <div key={idx} className="flex gap-2 text-red-400" id={`remediation-finding-${idx}`}>
+                      <span className="font-bold shrink-0">[{f.code}]</span>
+                      <span>{f.message} (Action: Adjust knobs to clear threshold of {f.threshold}).</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
