@@ -39,6 +39,7 @@ import GovernancePanel from './components/GovernancePanel';
 import RestorationPanel from './components/RestorationPanel';
 import HomePanel from './components/HomePanel';
 import AiModelSelector from './components/AiModelSelector';
+import ProgressiveExperience from './components/ProgressiveExperience';
 
 type ActiveTab = 'HOME' | 'STATE' | 'MEMORY' | 'REGISTRY' | 'GOVERNANCE' | 'RESTORATION';
 
@@ -106,6 +107,19 @@ function AppContent() {
   const [focusLock, setFocusLock] = useState<boolean>(false);
   const [isWorkspaceHovered, setIsWorkspaceHovered] = useState<boolean>(false);
   const [utcTime, setUtcTime] = useState<string>('');
+
+  // Progressive Disclosure Experience Layer State
+  const [onboardingLayer, setOnboardingLayer] = useState<1 | 2 | 3>(() => {
+    const saved = localStorage.getItem('arg_onboarding_layer');
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return 1; // Default to Layer 1 for first-time premium pristine empty screen
+  });
+
+  const handleSetOnboardingLayer = (layer: 1 | 2 | 3) => {
+    setOnboardingLayer(layer);
+    localStorage.setItem('arg_onboarding_layer', layer.toString());
+  };
 
   const {
     metrics,
@@ -246,6 +260,37 @@ function AppContent() {
     ? "blur-[5px] opacity-20 scale-[0.98] pointer-events-none transition-all duration-500 ease-out"
     : "blur-0 opacity-100 scale-100 transition-all duration-300 ease-out";
 
+  // If we are in Layer 1 or Layer 2, render the shocking minimalist onboarding flow
+  if (onboardingLayer === 1 || onboardingLayer === 2) {
+    return (
+      <div className="relative min-h-screen bg-[#030303] text-gray-300">
+        {/* Absolute Pristine Floating Experience Switcher */}
+        <div className="fixed top-3 right-4 z-50 flex items-center bg-[#0d0d0d]/90 backdrop-blur-md border border-[#222] px-3 py-1.5 rounded-full shadow-2xl space-x-2 text-[9.5px] font-mono font-bold select-none animate-fade-in transition-all">
+          <span className="text-gray-500 uppercase tracking-widest text-[8.5px]">Experience:</span>
+          {[1, 2, 3].map((layerNum) => (
+            <button
+              key={layerNum}
+              onClick={() => handleSetOnboardingLayer(layerNum as 1 | 2 | 3)}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer font-black ${
+                onboardingLayer === layerNum
+                  ? 'bg-[#FFD700] text-black shadow-[0_0_8px_rgba(255,215,0,0.3)]'
+                  : 'text-gray-500 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              L{layerNum}
+            </button>
+          ))}
+        </div>
+        
+        <ProgressiveExperience
+          currentLayer={onboardingLayer}
+          setLayer={handleSetOnboardingLayer}
+          onUnlockLayer3={() => handleSetOnboardingLayer(3)}
+        />
+      </div>
+    );
+  }
+
   if (osLayout === 'desktop') {
     return (
       <div className="relative min-h-screen bg-[#030303] text-gray-300 flex flex-col font-mono selection:bg-[#FFD700]/30 selection:text-white overflow-hidden" id="desktop-container">
@@ -269,30 +314,47 @@ function AppContent() {
             <span className="hidden sm:inline text-gray-500">9 Mandates Active</span>
           </div>
 
-          {/* Center: System Layout Switcher */}
-          <div className="bg-[#111] border border-[#222] rounded p-0.5 flex gap-1 items-center pointer-events-auto">
-            <button
-              onClick={() => {
-                setOsLayout('desktop');
-                addLog('Interface configuration changed: Minimalist Desktop Layout activated.', 'SYSTEM', 'GOVERNOR');
-              }}
-              className={`text-[9px] font-mono font-black px-3 py-0.5 rounded transition cursor-pointer ${
-                osLayout === 'desktop' ? 'bg-[#FFD700] text-black shadow-[0_0_8px_rgba(255,215,0,0.25)]' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              💻 OS DESKTOP
-            </button>
-            <button
-              onClick={() => {
-                setOsLayout('cockpit');
-                addLog('Interface configuration changed: Unified Tech Cockpit layout activated.', 'SYSTEM', 'GOVERNOR');
-              }}
-              className={`text-[9px] font-mono font-black px-3 py-0.5 rounded transition cursor-pointer ${
-                osLayout === 'cockpit' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              🎛️ COCKPIT
-            </button>
+          {/* Center: System Layout Switcher & Experience Switcher */}
+          <div className="flex items-center gap-2 pointer-events-auto">
+            <div className="bg-[#111] border border-[#222] rounded p-0.5 flex gap-1 items-center">
+              <button
+                onClick={() => {
+                  setOsLayout('desktop');
+                  addLog('Interface configuration changed: Minimalist Desktop Layout activated.', 'SYSTEM', 'GOVERNOR');
+                }}
+                className={`text-[9px] font-mono font-black px-3 py-0.5 rounded transition cursor-pointer ${
+                  osLayout === 'desktop' ? 'bg-[#FFD700] text-black shadow-[0_0_8px_rgba(255,215,0,0.25)]' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                💻 OS DESKTOP
+              </button>
+              <button
+                onClick={() => {
+                  setOsLayout('cockpit');
+                  addLog('Interface configuration changed: Unified Tech Cockpit layout activated.', 'SYSTEM', 'GOVERNOR');
+                }}
+                className={`text-[9px] font-mono font-black px-3 py-0.5 rounded transition cursor-pointer ${
+                  osLayout === 'cockpit' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                🎛️ COCKPIT
+              </button>
+            </div>
+
+            <div className="bg-[#111] border border-[#222] rounded p-0.5 flex gap-1 items-center">
+              <span className="text-[8px] text-gray-500 font-bold px-1.5 uppercase font-mono">EXP:</span>
+              {[1, 2, 3].map((layerNum) => (
+                <button
+                  key={layerNum}
+                  onClick={() => handleSetOnboardingLayer(layerNum as 1 | 2 | 3)}
+                  className={`text-[8px] font-mono font-bold px-2 py-0.5 rounded transition cursor-pointer ${
+                    onboardingLayer === layerNum ? 'bg-[#FFD700] text-black font-black' : 'text-gray-500 hover:text-white'
+                  }`}
+                >
+                  L{layerNum}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -675,30 +737,47 @@ function AppContent() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3.5">
-          {/* Desktop Layout Switcher */}
-          <div className="bg-[#050505] border border-[#222] rounded p-0.5 flex gap-1 items-center">
-            <button
-              onClick={() => {
-                setOsLayout('desktop');
-                addLog('Interface configuration changed: Minimalist Desktop Layout activated.', 'SYSTEM', 'GOVERNOR');
-              }}
-              className={`text-[10px] font-mono font-bold px-3 py-1 rounded transition cursor-pointer ${
-                osLayout === 'desktop' ? 'bg-[#FFD700] text-black shadow-[0_0_8px_rgba(255,215,0,0.2)]' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              💻 OS DESKTOP
-            </button>
-            <button
-              onClick={() => {
-                setOsLayout('cockpit');
-                addLog('Interface configuration changed: Unified Tech Cockpit layout activated.', 'SYSTEM', 'GOVERNOR');
-              }}
-              className={`text-[10px] font-mono font-bold px-3 py-1 rounded transition cursor-pointer ${
-                osLayout === 'cockpit' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              🎛️ COCKPIT
-            </button>
+          {/* Desktop Layout Switcher & Experience Switcher */}
+          <div className="flex items-center gap-2">
+            <div className="bg-[#050505] border border-[#222] rounded p-0.5 flex gap-1 items-center">
+              <button
+                onClick={() => {
+                  setOsLayout('desktop');
+                  addLog('Interface configuration changed: Minimalist Desktop Layout activated.', 'SYSTEM', 'GOVERNOR');
+                }}
+                className={`text-[10px] font-mono font-bold px-3 py-1 rounded transition cursor-pointer ${
+                  osLayout === 'desktop' ? 'bg-[#FFD700] text-black shadow-[0_0_8px_rgba(255,215,0,0.2)]' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                💻 OS DESKTOP
+              </button>
+              <button
+                onClick={() => {
+                  setOsLayout('cockpit');
+                  addLog('Interface configuration changed: Unified Tech Cockpit layout activated.', 'SYSTEM', 'GOVERNOR');
+                }}
+                className={`text-[10px] font-mono font-bold px-3 py-1 rounded transition cursor-pointer ${
+                  osLayout === 'cockpit' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                🎛️ COCKPIT
+              </button>
+            </div>
+
+            <div className="bg-[#050505] border border-[#222] rounded p-0.5 flex gap-1 items-center">
+              <span className="text-[9px] text-gray-500 font-bold px-1.5 uppercase font-mono">EXP:</span>
+              {[1, 2, 3].map((layerNum) => (
+                <button
+                  key={layerNum}
+                  onClick={() => handleSetOnboardingLayer(layerNum as 1 | 2 | 3)}
+                  className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded transition cursor-pointer ${
+                    onboardingLayer === layerNum ? 'bg-[#FFD700] text-black font-black' : 'text-gray-500 hover:text-white'
+                  }`}
+                >
+                  L{layerNum}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Global UI Perspective Switch */}
