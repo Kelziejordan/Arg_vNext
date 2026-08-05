@@ -240,7 +240,75 @@ function runClientSideLinter(codeStr: string): { score: number; findings: Client
   return { score, findings };
 }
 
-type SubTab = 'SAFEGUARDS' | 'COGNITIVE' | 'LINTER';
+const AOC_SECTIONS = [
+  {
+    title: "1. Purpose & Tagline",
+    subtitle: "Objective & Product Vision",
+    content: "The ARG Operational Constitution (AOC) defines how user objectives become governed workflows, how decisions escalate to the Decision Studio, how artifacts are preserved, and how continuity is maintained.\n\nOfficial Product Vision & Tagline:\n\"Describe what you want to build. We'll organize the details, secure the architecture, and ensure your progress is never lost.\""
+  },
+  {
+    title: "2. Precedence & Four-Layer Architecture",
+    subtitle: "Structural Priority & Separation",
+    content: "ARG operations are structured across four explicit architectural layers:\n• Layer 1: User / Operator Interface (Minimalist cockpit, <5% UI exposure).\n• Layer 2: Decision Studio (Highest deliberation environment for consensus & ADRs).\n• Layer 3: ARG Runtime Engine (Governor, Event Ledger, Knowledge Vault, Capability Registry).\n• Layer 4: Intelligence Network (Orchestrated specialist AI models & service tools).\n\nDocument Precedence: ACR (Immutable Law) > AOC (Operational Behavior) > ARS (Runtime Specification)."
+  },
+  {
+    title: "3. Product Philosophy & 5% UI Exposure Rule",
+    subtitle: "Shielding Operators from AI Noise",
+    content: "ARG delivers immediate user progress while shielding operators from low-level engineering complexity.\n\n• The <5% UI Exposure Rule: In Operator Mode, the UI MUST intentionally expose less than 5% of internal system machinery. Low-level logs, thread graphs, and raw state matrices are strictly suppressed.\n• Craft Over Volume: Visual elegance comes from spacious layout, precise typography, and negative space — never from adding unrequested widgets or sidebars."
+  },
+  {
+    title: "4. Operator vs. Builder Mode Separation",
+    subtitle: "Dual Operational Boundaries",
+    content: "ARG enforces a strict operational dual-mode boundary:\n• Operator Mode (Default Cockpit): Minimalist, outcome-centric canvas presenting G1 Canonical Intent, high-level status, and primary action controls. Obeys the 5-second onboarding rule.\n• Builder Mode (Engineering Inspector): Accessible via explicit toggle for developers and system auditors. Provides deep transparency into Policy Engine, Event Ledger, Capability Registry, and Telemetry."
+  },
+  {
+    title: "5. Canonical Operational States (0-5)",
+    subtitle: "Deterministic State Progress",
+    content: "ARG state transitions are strictly deterministic and replace all feature-centric paradigms:\n• State 0 (UNINITIALIZED): Baseline pristine seed state.\n• State 1 (INTENT_CAPTURED): Operator goal validated and assigned G1 Canonical Intent ID.\n• State 2 (DELIBERATING): Active confidence-based routing in Decision Studio.\n• State 3 (BLUEPRINT_COMPILED): Architectural plan, schemas, and compliance requirements frozen.\n• State 4 (EXECUTING): Controlled workspace building with active thread throttling.\n• State 5 (VERIFIED_COMPLIANT): Linter passed, ledger hash signed, and outcome explicitly verified."
+  },
+  {
+    title: "6. Confidence-Based Escalation Model",
+    subtitle: "Primary Execution & Deliberation Router",
+    content: "Escalation is governed by confidence scoring rather than automatic multi-agent overhead:\n• High Confidence (>85%): Automated execution through the ARG Runtime without stopping for manual deliberation.\n• Medium Confidence (50%–85%): Escalated to Decision Studio for multi-expert review and trade-off evaluation.\n• Low Confidence / Policy Clashes (<50%): Immediate execution dampening, simulation rollback, and Operator alert."
+  },
+  {
+    title: "7. Decision Studio & Outcome Verification",
+    subtitle: "Deliberation & End-to-End Proof",
+    content: "• Decision Studio: Supreme deliberation environment handling ADRs, specialist model orchestration, and policy clash resolution.\n• Mandatory Outcome Verification: At every State 5 completion, the runtime executes an explicit verification check: \"Did we actually achieve the user's intended canonical outcome?\"\n• Removal of Sovereign Intent Engine: Legacy Sovereign Intent Engine is explicitly removed by omission; canonical intent is directly managed through the G1 pipeline."
+  },
+  {
+    title: "8. Escalation Ladder",
+    subtitle: "Drift Intervention Phases",
+    content: "When validation fails, policy rules clash, or integrity drops below 50%:\n1. Dampen Vectors: Automatically throttle execution speed and reduce aggression.\n2. Simulation Rollback: Revert state in-memory to the last known compliant checkpoint.\n3. Reflex Reconstruction: Re-initialize runtime context from frozen seed baseline using safeStorage.\n4. Operator Alert: Present clear, plain-language recovery options to the operator."
+  },
+  {
+    title: "9. Governance & Independence",
+    subtitle: "Self-Authoritative Safety Checks",
+    content: "ARG retains operational integrity by running independent policy checks. The linter and liveness monitors are self-authoritative, ensuring that code safety and mandate compliance cannot be subverted by cognitive LLM overrides."
+  },
+  {
+    title: "10. Artifact Contract & Permanent Persistence",
+    subtitle: "Immutable Output Rules",
+    content: "All generated code, blueprints, and schemas are permanent artifacts signed with SHA-256 hashes.\n\nState recovery utilizes resilient in-memory fallbacks (safeStorage) if the browser denies iframe storage access, guaranteeing absolute continuity across sessions."
+  },
+  {
+    title: "11. Continuity, Recovery & Ledger Auditing",
+    subtitle: "Zero-Data-Loss Standards",
+    content: "• Append-Only Event Ledger: Every state update, policy check, and core reconstruction commits to an immutable ledger with SHA-256 signatures.\n• Session Auditing: Historical actions are searchable and verifiable, permitting safe, continuous multi-session operation across restarts."
+  },
+  {
+    title: "12. Pre-Freeze Acceptance Checklist",
+    subtitle: "Compliance Standard for Canonization",
+    content: "Before any specification or subsystem is frozen into v1.0 canonical status, it MUST pass 6 criteria:\n1. Architectural Completeness (conforms to ACR, AOC, ARS)\n2. State Determinism (zero-data-loss restoration)\n3. Recovery Validation (safeStorage fallback)\n4. Evidence Validation (traceable ledger signatures)\n5. Canonical Terminology (no arbitrary terms)\n6. Product Boundary Verification (<5% UI exposure)"
+  },
+  {
+    title: "13. Versioning & Transition Protocol",
+    subtitle: "Modification & Freeze Control",
+    content: "AOC v1.0 RC2 (Release Candidate 2) is the canonical reference. Amendments require dual-expert consensus inside the Decision Studio, certified by an immutable Ledger signature, and final authorization by the Operator."
+  }
+];
+
+type SubTab = 'SAFEGUARDS' | 'COGNITIVE' | 'LINTER' | 'CONSTITUTION';
 
 export default function GovernancePanel() {
   const {
@@ -257,6 +325,7 @@ export default function GovernancePanel() {
   } = useRuntime();
 
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('SAFEGUARDS');
+  const [selectedAocSection, setSelectedAocSection] = useState<number>(0);
 
   // Call the decoupled PolicyEngineService dynamically
   const liveReport = PolicyEngineService.evaluate({
@@ -511,6 +580,16 @@ export default function GovernancePanel() {
           }`}
         >
           Interactive Mandate Linter
+        </button>
+        <button
+          onClick={() => setActiveSubTab('CONSTITUTION')}
+          className={`px-3 py-1.5 text-xs font-mono font-bold border transition rounded ${
+            activeSubTab === 'CONSTITUTION'
+              ? 'bg-[#FFD700]/10 border-[#FFD700] text-[#FFD700]'
+              : 'border-transparent text-gray-500 hover:text-gray-300'
+          }`}
+        >
+          Operational Constitution (AOC) v1.0
         </button>
       </div>
 
@@ -1006,6 +1085,58 @@ export default function GovernancePanel() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 4: Operational Constitution Viewer */}
+        {activeSubTab === 'CONSTITUTION' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in text-gray-300 font-mono text-[11px]">
+            {/* Left sidebar: 13 sections of AOC */}
+            <div className="lg:col-span-4 bg-[#050505] border border-[#222] rounded p-4 flex flex-col space-y-2 max-h-[500px] overflow-y-auto scrollbar-thin">
+              <div className="border-b border-[#222] pb-3.5 mb-2">
+                <span className="text-[9px] text-[#FFD700] uppercase font-black tracking-wider block mb-1">ARG Operational Constitution</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-black text-xs">AOC v1.0</span>
+                  <span className="text-[8.5px] bg-[#FFD700]/10 text-[#FFD700] border border-[#FFD700]/30 px-1.5 py-0.5 rounded font-black uppercase">FROZEN</span>
+                </div>
+              </div>
+              {AOC_SECTIONS.map((sec, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedAocSection(idx)}
+                  className={`p-3 rounded text-left transition duration-150 border cursor-pointer ${
+                    selectedAocSection === idx
+                      ? 'bg-[#FFD700]/5 border-[#FFD700]/50 text-[#FFD700]'
+                      : 'bg-[#080808]/40 border-transparent hover:border-[#222] text-gray-400 hover:text-gray-200'
+                  }`}
+                >
+                  <span className="font-bold text-[10.5px] block">{sec.title}</span>
+                  <span className="text-[8.5px] text-gray-500 block truncate mt-0.5">{sec.subtitle}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Right details pane */}
+            <div className="lg:col-span-8 bg-[#050505] border border-[#222] rounded p-5 relative overflow-hidden min-h-[400px] flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD700]/3 rounded-full blur-2xl pointer-events-none -mr-16 -mt-16" />
+              
+              <div className="space-y-4 relative z-10">
+                <div className="border-b border-[#222] pb-4">
+                  <span className="text-[8.5px] text-gray-500 uppercase font-black block">CANONICAL SECTION VIEW</span>
+                  <h2 className="text-sm font-black text-white uppercase tracking-wider mt-1">{AOC_SECTIONS[selectedAocSection].title}</h2>
+                  <span className="text-[10px] text-[#FFD700] block mt-0.5">{AOC_SECTIONS[selectedAocSection].subtitle}</span>
+                </div>
+
+                <div className="text-xs text-gray-300 leading-relaxed font-sans whitespace-pre-wrap max-w-prose select-text py-1">
+                  {AOC_SECTIONS[selectedAocSection].content}
+                </div>
+              </div>
+
+              <div className="border-t border-[#1a1a1a] pt-4 mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[9px] text-gray-500 relative z-10 font-mono">
+                <span className="uppercase">Authority Hash: SHA256_AOC_V1_0_CANONICAL_MATCH</span>
+                <span className="bg-[#111] border border-[#222] px-2 py-1 rounded text-[8.5px] text-gray-400">STATUS: BINDING</span>
               </div>
             </div>
           </div>

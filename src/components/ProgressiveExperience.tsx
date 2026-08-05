@@ -26,6 +26,7 @@ import {
   Users
 } from 'lucide-react';
 import { useRuntime } from '../core/RuntimeContext';
+import { safeStorage } from '../core/safeStorage';
 import AskArgConsole from './AskArgConsole';
 import IntentTranslator from './IntentTranslator';
 import DocumentAnalyzer from './DocumentAnalyzer';
@@ -46,7 +47,7 @@ export default function ProgressiveExperience({
   // Active user target goal
   const [goalInput, setGoalInput] = useState('');
   const [activeGoalText, setActiveGoalText] = useState(() => {
-    return localStorage.getItem('arg_onboarding_active_goal') || '';
+    return safeStorage.getItem('arg_onboarding_active_goal') || '';
   });
 
   // Layer 2 active tool selector
@@ -54,7 +55,7 @@ export default function ProgressiveExperience({
 
   // Dynamically managed list of actual user-authored recent projects, starting completely empty
   const [recentProjects, setRecentProjects] = useState<{ title: string; desc: string }[]>(() => {
-    const saved = localStorage.getItem('arg_recent_projects_v1.6');
+    const saved = safeStorage.getItem('arg_recent_projects_v1.6');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -87,7 +88,7 @@ export default function ProgressiveExperience({
     if (!goal.trim()) return;
     updateCanonicalIntent(goal);
     setActiveGoalText(goal);
-    localStorage.setItem('arg_onboarding_active_goal', goal);
+    safeStorage.setItem('arg_onboarding_active_goal', goal);
     
     // Add to actual user recent projects
     const shortTitle = goal.substring(0, 40) + (goal.length > 40 ? '...' : '');
@@ -95,7 +96,7 @@ export default function ProgressiveExperience({
     const filtered = recentProjects.filter(p => p.desc !== goal);
     const updated = [newProject, ...filtered].slice(0, 5);
     setRecentProjects(updated);
-    localStorage.setItem('arg_recent_projects_v1.6', JSON.stringify(updated));
+    safeStorage.setItem('arg_recent_projects_v1.6', JSON.stringify(updated));
 
     addLog(`User initiated onboarding goal: "${goal.substring(0, 45)}..."`, 'SYSTEM', 'SEED');
     setLayer(2);
@@ -105,7 +106,7 @@ export default function ProgressiveExperience({
     if (window.confirm("Reset your active project state and return to pristine Layer 1?")) {
       setGoalInput('');
       setActiveGoalText('');
-      localStorage.removeItem('arg_onboarding_active_goal');
+      safeStorage.removeItem('arg_onboarding_active_goal');
       addLog('Onboarding project reset to pristine Layer 1 baseline.', 'INFO', 'SEED');
       setLayer(1);
     }

@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 
 import { RuntimeProvider, useRuntime } from './core/RuntimeContext';
+import { safeStorage } from './core/safeStorage';
 import OperationalStatePanel from './components/OperationalStatePanel';
 import KnowledgeObjectsPanel from './components/KnowledgeObjectsPanel';
 import CapabilityRegistryPanel from './components/CapabilityRegistryPanel';
@@ -110,7 +111,7 @@ function AppContent() {
 
   // Progressive Disclosure Experience Layer State
   const [onboardingLayer, setOnboardingLayer] = useState<1 | 2 | 3>(() => {
-    const saved = localStorage.getItem('arg_onboarding_layer');
+    const saved = safeStorage.getItem('arg_onboarding_layer');
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return 1; // Default to Layer 1 for first-time premium pristine empty screen
@@ -118,7 +119,7 @@ function AppContent() {
 
   const handleSetOnboardingLayer = (layer: 1 | 2 | 3) => {
     setOnboardingLayer(layer);
-    localStorage.setItem('arg_onboarding_layer', layer.toString());
+    safeStorage.setItem('arg_onboarding_layer', layer.toString());
   };
 
   const {

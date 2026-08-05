@@ -5,6 +5,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { SystemMetric, SystemLog, PriorityGoal, DomainProtocol, AiModel, POPULAR_AI_MODELS } from '../types';
+import { safeStorage } from './safeStorage';
 import { eventLedgerInstance } from '../services/EventLedgerService';
 import { PolicyEngineService } from '../services/PolicyEngineService';
 import { capabilityRegistryInstance } from '../services/CapabilityRegistryService';
@@ -143,6 +144,10 @@ export interface RuntimeContextType {
   selectedModelId: string;
   selectedModel: AiModel;
   setSelectedModelId: (id: string) => void;
+
+  // Active Canonical Intent
+  canonicalIntent: string;
+  updateCanonicalIntent: (intent: string, tags?: string[]) => void;
 }
 
 const RuntimeContext = createContext<RuntimeContextType | undefined>(undefined);
@@ -217,6 +222,30 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
     };
     setLogs(prev => [newLog, ...prev].slice(0, 50));
   }, []);
+
+  // Active Canonical Intent state
+  const [canonicalIntent, setCanonicalIntent] = useState<string>(() => {
+    return safeStorage.getItem('arg_canonical_intent') || '';
+  });
+
+  const updateCanonicalIntent = useCallback((intent: string, tags?: string[]) => {
+    setCanonicalIntent(intent);
+    safeStorage.setItem('arg_canonical_intent', intent);
+    addLog(`Canonical Intent updated: "${intent.substring(0, 50)}${intent.length > 50 ? '...' : ''}"`, 'SYSTEM', 'SPINE');
+    
+    // Also update priority goal based on this intent
+    setGoals(prev => {
+      const g1 = prev.find(g => g.id === 'G1');
+      if (g1) {
+        return prev.map(g => g.id === 'G1' ? {
+          ...g,
+          title: `Build Project: ${intent.substring(0, 35)}${intent.length > 35 ? '...' : ''}`,
+          description: `Aligning workspace & policies for goal: "${intent.substring(0, 60)}${intent.length > 60 ? '...' : ''}"`
+        } : g);
+      }
+      return prev;
+    });
+  }, [addLog]);
 
   // Real persistent decoupled event ledger state
   const [ledgerEvents, setLedgerEvents] = useState<any[]>([]);
@@ -879,7 +908,10 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
 
       selectedModelId,
       selectedModel,
-      setSelectedModelId
+      setSelectedModelId,
+
+      canonicalIntent,
+      updateCanonicalIntent
     }}>
       {children}
     </RuntimeContext.Provider>
