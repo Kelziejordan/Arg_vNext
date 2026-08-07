@@ -242,69 +242,94 @@ function runClientSideLinter(codeStr: string): { score: number; findings: Client
 
 const AOC_SECTIONS = [
   {
-    title: "1. Purpose & Tagline",
+    title: "0. Document Stack (Context)",
+    subtitle: "Multi-Document Stack Responsibility",
+    content: "This document is one layer in a multi-document constitutional stack:\n• ACR v1.0 — Immutable architectural law.\n• AOC v1.0 RC2 (this document) — Immutable operational law.\n• ARS v1.0 — Runtime implementation specification.\n• Deliberation Environment Spec v1.0 — Deliberation engine spec (reference: Decision Studio).\n• Workspace Spec v1.0 — Operator & Builder experience spec.\n• Knowledge Vault Spec v1.0 — Persistence, continuity & retrieval spec.\n• Acceptance Standard v1.0 — Freeze criteria."
+  },
+  {
+    title: "1. Purpose & Product Tagline",
     subtitle: "Objective & Product Vision",
-    content: "The ARG Operational Constitution (AOC) defines how user objectives become governed workflows, how decisions escalate to the Decision Studio, how artifacts are preserved, and how continuity is maintained.\n\nOfficial Product Vision & Tagline:\n\"Describe what you want to build. We'll organize the details, secure the architecture, and ensure your progress is never lost.\""
+    content: "The AOC defines how user objectives become governed workflows, how decisions escalate, and how continuity is maintained.\n\nOfficial Product Vision & Tagline:\n\"Describe what you want to build. We'll organize the details, secure the architecture, and ensure your progress is never lost.\""
   },
   {
     title: "2. Precedence & Four-Layer Architecture",
     subtitle: "Structural Priority & Separation",
-    content: "ARG operations are structured across four explicit architectural layers:\n• Layer 1: User / Operator Interface (Minimalist cockpit, <5% UI exposure).\n• Layer 2: Decision Studio (Highest deliberation environment for consensus & ADRs).\n• Layer 3: ARG Runtime Engine (Governor, Event Ledger, Knowledge Vault, Capability Registry).\n• Layer 4: Intelligence Network (Orchestrated specialist AI models & service tools).\n\nDocument Precedence: ACR (Immutable Law) > AOC (Operational Behavior) > ARS (Runtime Specification)."
+    content: "ARG operations are structured across four explicit architectural layers:\n• Layer 1: User / Operator Interface (Minimalist cockpit, <5% UI exposure).\n• Layer 2: Deliberation Environment (Highest deliberation environment for consensus & ADRs; reference: Decision Studio).\n• Layer 3: ARG Runtime Engine (Governor, Event Ledger, Knowledge Vault, Capability Registry).\n• Layer 4: Intelligence Network (Orchestrated specialist AI models & service tools).\n\nDocument Precedence: ACR (Immutable Law) > AOC (Operational Behavior) > ARS (Runtime Spec)."
   },
   {
-    title: "3. Product Philosophy & 5% UI Exposure Rule",
+    title: "3. Product Philosophy & <5% UI Exposure Rule",
     subtitle: "Shielding Operators from AI Noise",
-    content: "ARG delivers immediate user progress while shielding operators from low-level engineering complexity.\n\n• The <5% UI Exposure Rule: In Operator Mode, the UI MUST intentionally expose less than 5% of internal system machinery. Low-level logs, thread graphs, and raw state matrices are strictly suppressed.\n• Craft Over Volume: Visual elegance comes from spacious layout, precise typography, and negative space — never from adding unrequested widgets or sidebars."
+    content: "ARG delivers immediate user progress while shielding operators from low-level engineering complexity.\n\n• Interface Principle: The interface expresses operational states; it does not define them.\n• The <5% UI Exposure Rule: In Operator Mode, the UI MUST intentionally expose less than 5% of internal system machinery. Low-level logs, thread graphs, and raw state matrices are strictly suppressed."
   },
   {
-    title: "4. Operator vs. Builder Mode Separation",
-    subtitle: "Dual Operational Boundaries",
-    content: "ARG enforces a strict operational dual-mode boundary:\n• Operator Mode (Default Cockpit): Minimalist, outcome-centric canvas presenting G1 Canonical Intent, high-level status, and primary action controls. Obeys the 5-second onboarding rule.\n• Builder Mode (Engineering Inspector): Accessible via explicit toggle for developers and system auditors. Provides deep transparency into Policy Engine, Event Ledger, Capability Registry, and Telemetry."
+    title: "3.1 Operational Principles",
+    subtitle: "Outcome-Centric Behavioral Pillars",
+    content: "• Outcome-centric: Every workflow is anchored to a user objective.\n• Governed by confidence: Escalation and deliberation are driven by confidence thresholds.\n• Traceable by default: Every decision produces an artifact with provenance.\n• Continuity over sessions: Preserves ongoing project state across restarts.\n• Reversible when possible: Prefers auditable, reversible actions.\n• Technology-agnostic: Invariant across AI providers and containers."
   },
   {
-    title: "5. Canonical Operational States (0-5)",
+    title: "3.5 Operational Invariants",
+    subtitle: "Systemic Safeguards (Invariants 1-14)",
+    content: "1. Every request produces state.\n2. Every state is recoverable.\n3. Every escalation increases confidence.\n4. Every decision produces traceable artifacts.\n5. Every artifact maintains provenance.\n6. Every completed workflow updates continuity.\n7. Every workflow may resume after interruption.\n8. Every project remains AI-independent.\n9. No knowledge is silently destroyed.\n10. No operational state bypasses governance.\n11. Every user objective is evaluated before completion.\n12. No implementation may redefine Canonical Operational States.\n13. Every execution cycle ends with an explicit outcome check.\n14. CORE PHILOSOPHY: Execution SHALL remain subordinate to understanding. ARG shall not optimize for speed at the expense of correctly understanding the user's objective."
+  },
+  {
+    title: "4. Operational Separation (Layer Recognition)",
+    subtitle: "Layer Boundaries & Constraints",
+    content: "Ordinary execution occurs in the ARG Runtime; it MUST NOT silently escalate into deliberation without a defined trigger.\n\nDeliberation occurs in the Deliberation Environment; it MUST NOT be treated as ordinary execution once triggered.\n\nThe Intelligence Network is interchangeable; no single provider is architecturally privileged."
+  },
+  {
+    title: "5. Canonical Operational States (States 0-5)",
     subtitle: "Deterministic State Progress",
-    content: "ARG state transitions are strictly deterministic and replace all feature-centric paradigms:\n• State 0 (UNINITIALIZED): Baseline pristine seed state.\n• State 1 (INTENT_CAPTURED): Operator goal validated and assigned G1 Canonical Intent ID.\n• State 2 (DELIBERATING): Active confidence-based routing in Decision Studio.\n• State 3 (BLUEPRINT_COMPILED): Architectural plan, schemas, and compliance requirements frozen.\n• State 4 (EXECUTING): Controlled workspace building with active thread throttling.\n• State 5 (VERIFIED_COMPLIANT): Linter passed, ledger hash signed, and outcome explicitly verified."
+    content: "ARG state transitions are strictly deterministic:\n• State 0 (Intake & Orientation): Understand initial intent, context, and constraints.\n• State 1 (Clarification & Scoping): Transform intent into bounded, testable scope.\n• State 2 (Planning & Design): Produce explicit plan connecting objective to executable steps.\n• State 3 (Execution & Production): Carry out approved plan under governance.\n• State 4 (Verification & Review): Assess output against success criteria & perform outcome check.\n• State 5 (Operational Workspace): Support ongoing user-controlled operations."
   },
   {
-    title: "6. Confidence-Based Escalation Model",
-    subtitle: "Primary Execution & Deliberation Router",
-    content: "Escalation is governed by confidence scoring rather than automatic multi-agent overhead:\n• High Confidence (>85%): Automated execution through the ARG Runtime without stopping for manual deliberation.\n• Medium Confidence (50%–85%): Escalated to Decision Studio for multi-expert review and trade-off evaluation.\n• Low Confidence / Policy Clashes (<50%): Immediate execution dampening, simulation rollback, and Operator alert."
+    title: "6. Deliberation Environment & Deliberation Mode",
+    subtitle: "Constitutional Deliberation Engine",
+    content: "Ordinary execution and structured deliberation are distinct behavioral modes and MUST NOT be conflated.\n\n• Deliberation MUST be entered through an explicit, recorded trigger.\n• Deliberation MUST produce an artifact capturing reason for entry, alternatives considered, and resolution.\n• Deliberation MUST exit either back to triggering state with increased confidence, or escalate to user."
   },
   {
-    title: "7. Decision Studio & Outcome Verification",
-    subtitle: "Deliberation & End-to-End Proof",
-    content: "• Decision Studio: Supreme deliberation environment handling ADRs, specialist model orchestration, and policy clash resolution.\n• Mandatory Outcome Verification: At every State 5 completion, the runtime executes an explicit verification check: \"Did we actually achieve the user's intended canonical outcome?\"\n• Removal of Sovereign Intent Engine: Legacy Sovereign Intent Engine is explicitly removed by omission; canonical intent is directly managed through the G1 pipeline."
+    title: "7. Confidence as Primary Routing Mechanism",
+    subtitle: "Execution vs Deliberation Router",
+    content: "Confidence is the sole legitimate signal routing execution between ordinary execution and deliberation.\n\nEscalation Ladder:\n1. Dampen Vectors: Throttle execution speed & reduce aggression.\n2. Simulation Rollback: Revert state in-memory to last known compliant checkpoint.\n3. Reflex Reconstruction: Re-initialize runtime context from frozen seed baseline using safeStorage.\n4. Operator Alert: Present clear, plain-language recovery options."
   },
   {
-    title: "8. Escalation Ladder",
-    subtitle: "Drift Intervention Phases",
-    content: "When validation fails, policy rules clash, or integrity drops below 50%:\n1. Dampen Vectors: Automatically throttle execution speed and reduce aggression.\n2. Simulation Rollback: Revert state in-memory to the last known compliant checkpoint.\n3. Reflex Reconstruction: Re-initialize runtime context from frozen seed baseline using safeStorage.\n4. Operator Alert: Present clear, plain-language recovery options to the operator."
+    title: "8. Operator Mode vs Builder Mode",
+    subtitle: "Dual Operational Boundaries",
+    content: "• Operator Mode: The user interacts with the project as a running system — monitoring, approving, and directing outcomes without engaging implementation detail (<5% UI exposure).\n• Builder Mode: The user interacts with the project as an evolving system — modifying plans, artifacts, and structure directly."
   },
   {
     title: "9. Governance & Independence",
-    subtitle: "Self-Authoritative Safety Checks",
-    content: "ARG retains operational integrity by running independent policy checks. The linter and liveness monitors are self-authoritative, ensuring that code safety and mandate compliance cannot be subverted by cognitive LLM overrides."
+    subtitle: "Provider-Agnostic Audit Systems",
+    content: "ARG is designed to remain independent of any single AI provider or implementation stack.\n\nEvery project remains AI-independent: artifacts, states, and continuity MUST be preserved in provider-agnostic forms. No operational state may bypass governance."
   },
   {
-    title: "10. Artifact Contract & Permanent Persistence",
-    subtitle: "Immutable Output Rules",
-    content: "All generated code, blueprints, and schemas are permanent artifacts signed with SHA-256 hashes.\n\nState recovery utilizes resilient in-memory fallbacks (safeStorage) if the browser denies iframe storage access, guaranteeing absolute continuity across sessions."
+    title: "10. Acceptance Criteria & Explicit Outcome Check",
+    subtitle: "Mandatory End-of-Cycle Evaluation",
+    content: "Every operational cycle SHALL end with an explicit, recorded answer to the question:\n\"Did we actually achieve the user's intended outcome?\"\n\nThis check is a formal operational obligation. A workflow MUST NOT be marked complete until this check has been performed and recorded as an artifact."
   },
   {
-    title: "11. Continuity, Recovery & Ledger Auditing",
+    title: "11. Artifact Contract",
+    subtitle: "Traceability & Provenance Fields",
+    content: "Every decision, plan, step, verification, or deliberation produces an artifact declaring:\n• Identifier & Type\n• Source State & Trigger\n• Timestamp & Confidence Score\n• Provenance Chain & Superseded References\n• Persistence Reference (pointer resolvable by Knowledge Vault Spec)\n• Audit Reference (pointer resolvable by ARS / Event Ledger)"
+  },
+  {
+    title: "12. Continuity, Recovery & Knowledge",
     subtitle: "Zero-Data-Loss Standards",
-    content: "• Append-Only Event Ledger: Every state update, policy check, and core reconstruction commits to an immutable ledger with SHA-256 signatures.\n• Session Auditing: Historical actions are searchable and verifiable, permitting safe, continuous multi-session operation across restarts."
+    content: "• No knowledge is silently destroyed. Deletion, redaction, or archival MUST be governed and traceable.\n• Every state is recoverable using resilient in-memory fallbacks (safeStorage) across session restarts.\n• Every completed workflow updates continuity."
   },
   {
-    title: "12. Pre-Freeze Acceptance Checklist",
+    title: "13. Explicit Exclusions",
+    subtitle: "Settled Architectural Decisions",
+    content: "To prevent future re-litigation of settled decisions, the AOC explicitly records what has been deliberately excluded:\n• Sovereign Intent Engine: Explicitly excluded from core architecture. No implementation may reintroduce an autonomous, unbounded intent-setting component without full constitutional amendment."
+  },
+  {
+    title: "14. Pre-Freeze Acceptance Checklist",
     subtitle: "Compliance Standard for Canonization",
-    content: "Before any specification or subsystem is frozen into v1.0 canonical status, it MUST pass 6 criteria:\n1. Architectural Completeness (conforms to ACR, AOC, ARS)\n2. State Determinism (zero-data-loss restoration)\n3. Recovery Validation (safeStorage fallback)\n4. Evidence Validation (traceable ledger signatures)\n5. Canonical Terminology (no arbitrary terms)\n6. Product Boundary Verification (<5% UI exposure)"
+    content: "Before any specification in the document stack may be declared canonical/FROZEN, it must satisfy the freeze criteria:\n1. Provider-agnostic constitutional statements.\n2. Abstract concept mapping for product names.\n3. Testable operational obligations.\n4. Explicit outcome evaluation at cycle end.\n5. Zero floating architectural ideas."
   },
   {
-    title: "13. Versioning & Transition Protocol",
-    subtitle: "Modification & Freeze Control",
-    content: "AOC v1.0 RC2 (Release Candidate 2) is the canonical reference. Amendments require dual-expert consensus inside the Decision Studio, certified by an immutable Ledger signature, and final authorization by the Operator."
+    title: "15. Versioning & Change Control",
+    subtitle: "Candidate Status & Transition Protocol",
+    content: "This document is AOC v1.0 RC2 (Constitutional Review Candidate) and is NOT yet Canonical FROZEN.\n\nUpon final constitutional review incorporating all outstanding architectural decisions, it MAY be promoted to AOC v1.0 (Canonical) and marked FROZEN."
   }
 ];
 
