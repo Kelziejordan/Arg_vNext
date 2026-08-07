@@ -1,47 +1,77 @@
-# Arg Anchor
+# ARG Anchor
 
-An offline-first, sovereign cybernetic runtime control center focusing on architectural alignment, static mandate linting, and reflex state reconstruction.
-
-Designed in partnership with Gemini for absolute architectural integrity and operator independence.
+> *"Describe what you want to build. We'll organize the details, secure the architecture, and ensure your progress is never lost."*
 
 ---
 
-## Technical Specifications & Architecture
+## What is ARG?
 
-Arg Anchor is built as a highly modular, decoupled single-page cybernetic dashboard running React 18+, TypeScript, and Tailwind CSS.
+**ARG** (Autonomous Reconstruction Group) is an intelligent, self-guided workspace designed to help you build software safely and easily.
 
-### Core Components & Portability
+Building apps often comes with messy setup files, sudden bugs, or lost work when something goes wrong. ARG solves this by acting as a smart project manager and safety net:
+* **You focus on your ideas:** Just tell ARG what you want to build.
+* **ARG handles the structure:** It breaks your goal down into clear blueprints, writes clean code, and checks for potential bugs automatically.
+* **Your progress is safe:** Every action is automatically saved in a continuous ledger, so you can restore or roll back your project at any time.
 
-The workspace is designed with absolute portability in mind:
-*   **Fully Self-Contained:** It does not require proprietary, locked-in cloud databases or proprietary servers to execute standard client operations.
-*   **AOT Mandate Analysis:** Employs an interactive client-side AST simulator and server-side rules validator for static engineering checks.
-*   **Sovereign State Storage:** Local state, snapshots, and event-sourced ledger updates reside inside standard client memory systems (`localStorage` patterns / active context).
-*   **Reflex Reconstruction Engine:** Runs a step-by-step autonomic alignment and manual/automated roll-back loop to keep cognitive drift within safe thresholds.
+---
 
-### Portability and Running Outside of AI Studio
+## Key Features in Simple Terms
 
-Yes, this build is **100% portable** and is not stuck inside AI Studio. You can download and run it in any modern web runtime or container system.
+### 1. Simple Mode vs. Detailed Mode
+* **Operator Mode (Default):** A clean, clutter-free screen where you can focus on your goals without being distracted by technical code background noise.
+* **Builder Mode:** A detailed view for developers who want to inspect safety rules, check live system metrics, and customize system settings.
 
-#### Running Locally (Stand-alone Development)
+### 2. Automatic Safety Checks & Rules
+ARG automatically runs your project through **9 Core Engineering Rules** (Mandates) to make sure your code stays fast, secure, and well-organized—preventing crashes before they happen.
 
-1.  **Clone / Download** the ZIP package containing the workspace files.
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Launch the local dev environment:
-    ```bash
-    npm run dev
-    ```
-4.  Run a production build:
-    ```bash
-    npm run build
-    npm run start
-    ```
+### 3. Automatic Backups & Recovery
+Never worry about losing your work. ARG logs every change to a secure history timeline. If an update breaks something, you can restore your workspace to any previous point with a single click.
 
-#### Stand-alone Containerization (Docker)
+### 4. 100% Portable (Runs Anywhere)
+ARG doesn't lock you into a proprietary cloud server. You can download your project and run it anywhere—on your own laptop, in a Docker container, or hosted on your own server.
 
-You can containerize this build easily to deploy to your own private servers, Raspberry Pi, AWS, Google Cloud, or any standard VPS:
+---
+
+## How ARG Works (The 6 Simple Steps)
+
+1. **Intake (Step 0):** You enter what you want to build or achieve.
+2. **Scoping (Step 1):** ARG asks a few clear questions to make sure it understands your goals and constraints.
+3. **Planning (Step 2):** A step-by-step execution blueprint is created.
+4. **Execution (Step 3):** ARG builds the project features step-by-step.
+5. **Verification (Step 4):** ARG checks the final result with one fundamental question: *"Did we actually achieve what you wanted?"*
+6. **Workspace (Step 5):** Your project is live, verified, and ready for you to use or expand!
+
+---
+
+## How to Run ARG on Your Own Computer
+
+You can easily run ARG locally or host it on your own server.
+
+### Option 1: Run Locally (Node.js)
+
+1. **Download/Clone** the project files to your computer.
+2. Open your terminal in the project folder and install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the app in development mode:
+   ```bash
+   npm run dev
+   ```
+4. Open your web browser and go to `http://localhost:3000`.
+
+To build for production:
+```bash
+npm run build
+npm run start
+```
+
+---
+
+### Option 2: Run with Docker
+
+If you prefer using Docker, you can containerize and launch ARG with this simple setup:
+
 ```dockerfile
 FROM node:20-alpine
 WORKDIR /app
@@ -55,26 +85,17 @@ CMD ["npm", "run", "start"]
 
 ---
 
-## Identity Knobs & Core Pillars
+## Project Governance & Legal Docs
 
-The Arg Anchor environment consists of a dual-layered pipeline: an **Intent Processing Pipeline** and **Five Autonomic Subsystem Pillars**.
-
-### The Intent Processing Pipeline
-1.  **Intent Translation (Stage 1.0):** Compiles raw operator intents into structured, canonical specifications, complete with schema adjustments, database tables, and validation models.
-2.  **Execution Orchestration (Stage 1.5):** Decomposes specifications into granular capability demands and routes them dynamically across interchangeable execution engines (GPT, Claude, Gemini-tier models) while preserving a single, unified, sovereign state core.
-3.  **Target Projection (Stage 2.0):** Employs safe, isolated, and dry-run code-generation pipelines to project final React TSX components, configurations, and specs.
-
-### The Five Autonomic Subsystem Pillars
-1.  **Operational State Service (Pillar 1):** Real-time identity vectors adjustments (Aggression Stance, Caution Guardrails, Exploration Rate) plotted on an Autonomic Balance Vector Map.
-2.  **Knowledge Objects Service (Pillar 2):** Read-only, immutable schemas and catalog matrices representing protocols, directories, and knowledge states.
-3.  **Policy & Constitutional Governance (Pillar 3):** Safeguards, intent arbitration conflict simulator, and the four organism layers (Adaptive Autonomy, Cognitive Cache, Micro-Intent Engine, Self-Healing Runtime).
-4.  **Capability Registry Service (Pillar 4):** A real-time, event-sourced registry of pipelines, active processing threads, and system operational metrics.
-5.  **Restoration & Reflex Reconstruction (Pillar 5):** Disaster recovery console, end-of-session State Refresh controls, and append-only continuity snapshot logs.
+For a deep dive into the official rules and guidelines powering ARG:
+* **[ACR.md](./ACR.md):** Architectural Law & Safety Boundaries.
+* **[AOC.md](./AOC.md):** Operational Constitution (AOC v1.0 RC2) — Rules for workflows, state management, and user experience.
+* **[ARS.md](./ARS.md):** Architectural Runtime Specifications & Technical Details.
 
 ---
 
-## Contact & Sovereignty Information
+## Credits
 
-*   **Operator & Primary Sovereign:** [Kelsea Ziegler](mailto:kelseaziegler@gmail.com)
-*   **Co-Architect partner:** Gemini
-*   **Status:** Architectural Core Frozen
+* **Primary Creator & Operator:** Kelsea Ziegler ([kelseaziegler@gmail.com](mailto:kelseaziegler@gmail.com))
+* **Co-Architect Partner:** Google Gemini
+* **Status:** Operational Constitution v1.0 RC2
