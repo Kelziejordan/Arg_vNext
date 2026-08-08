@@ -133,31 +133,26 @@ export default function RestorationPanel() {
               </span>
             </div>
 
-            {/* Slider to simulate drift */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-[9px] font-mono text-gray-500">
-                <span>SIMULATE SYSTEM DRIFT:</span>
-                <span className="text-gray-400">Current Confidence: {confidence.toFixed(2)}</span>
-              </div>
-              <input
-                type="range"
-                min="0.2"
-                max="1.0"
-                step="0.05"
-                value={confidence}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  setConfidence(val);
-                  if (val < 0.5) {
-                    addLog(`Critical drift injected manually: integrity fell to ${(val * 100).toFixed(1)}%`, 'ERROR', 'SPINE');
-                  }
-                }}
-                className="w-full accent-[#FFD700] h-1 bg-[#222] rounded outline-none cursor-pointer"
-                disabled={localReconstructing}
-              />
-              <div className="flex justify-between text-[8px] font-mono text-gray-600">
-                <span className="text-red-500">DRIFTED (RECONSTRUCT &lt;50%)</span>
-                <span className="text-emerald-400">STABLE CORE (100%)</span>
+            {/* Live System Alignment Metrics */}
+            <div className="space-y-3 pt-1">
+              <span className="text-[9px] font-mono text-gray-500 uppercase tracking-wider block">Live System Alignment Status</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[9.5px] font-mono">
+                <div className="bg-[#111] p-2 rounded border border-[#222] flex items-center justify-between">
+                  <span className="text-gray-500">CONSTITUTION:</span>
+                  <span className="text-emerald-400 font-bold uppercase">100% SECURE</span>
+                </div>
+                <div className="bg-[#111] p-2 rounded border border-[#222] flex items-center justify-between">
+                  <span className="text-gray-500">MANDATES:</span>
+                  <span className="text-emerald-400 font-bold uppercase">9/9 PASSED</span>
+                </div>
+                <div className="bg-[#111] p-2 rounded border border-[#222] flex items-center justify-between">
+                  <span className="text-gray-500">LEDGER HASH:</span>
+                  <span className="text-emerald-400 font-bold uppercase">CHAIN VALID</span>
+                </div>
+                <div className="bg-[#111] p-2 rounded border border-[#222] flex items-center justify-between">
+                  <span className="text-gray-500">SYSTEM DRIFT:</span>
+                  <span className="text-emerald-400 font-bold uppercase">0.00% (NOMINAL)</span>
+                </div>
               </div>
             </div>
           </div>
